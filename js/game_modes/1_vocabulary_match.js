@@ -32,7 +32,7 @@ class VocabularyMatchMode {
 
     // Gunakan instruksi dari AI, atau gunakan default jika AI gagal/kosong
     const instruction =
-      dynamicInstruction || `Pilih kata yang sesuai untuk gambar ini.`;
+      dynamicInstruction || `Choose the correct word for the image.`;
     this.ui.drawInstruction(instruction);
 
     const challengeHtml = `

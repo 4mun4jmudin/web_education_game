@@ -28,7 +28,7 @@ class GameEngine {
     const categoryDisplayName =
       GAME_DATA.categories[this.levelData.category].displayName;
     this.ui.updateLevelIndicator(
-      `Petualangan ${this.currentLevel}: ${categoryDisplayName}`
+      `Adventure ${this.currentLevel}: ${categoryDisplayName}`
     );
     this.ui.updateScoreIndicator(this.score);
     this.ui.showScreen("game");

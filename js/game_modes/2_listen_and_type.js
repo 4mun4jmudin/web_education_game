@@ -15,7 +15,7 @@ class ListenAndTypeMode {
     const correctAnswer = this.challengeData.en.toLowerCase();
 
     const instruction =
-      dynamicInstruction || "Dengarkan dan ketik apa yang kamu dengar.";
+      dynamicInstruction || "Listen and type what you hear.";
     this.ui.drawInstruction(instruction);
     this.ui.drawChallenge(""); // Area tantangan utama dikosongkan
 

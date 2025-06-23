@@ -14,7 +14,7 @@ class SpeakTheWordMode {
         this.onSubmit = onSubmitCallback;
         const correctAnswer = this.challengeData.en;
 
-        const instruction = dynamicInstruction || "Tekan mikrofon dan ucapkan kata berikut:";
+        const instruction = dynamicInstruction || "Press the microphone and say the word:";
         this.ui.drawInstruction(instruction);
 
         const challengeHtml = `

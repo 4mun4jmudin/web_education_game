@@ -21,7 +21,7 @@ class SentenceBuilderMode {
         const words = correctAnswer.split(' ');
         const shuffledWords = [...words].sort(() => 0.5 - Math.random());
 
-        const instruction = dynamicInstruction || "Susun kata-kata ini menjadi kalimat yang benar.";
+        const instruction = dynamicInstruction || "Arrange these words into a correct sentence.";
         this.ui.drawInstruction(instruction);
 
         const challengeHtml = `

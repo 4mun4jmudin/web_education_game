@@ -4,7 +4,7 @@ const GAME_DATA = {
     // Kategori ini bisa Anda tambah terus menerus
     categories: {
         animals: {
-            displayName: "Hewan",
+            displayName: "Animals",
             words: [
                 { en: "Cat", id: "kucing" }, { en: "Dog", id: "anjing" },
                 { en: "Bird", id: "burung" }, { en: "Fish", id: "ikan" },
@@ -15,7 +15,7 @@ const GAME_DATA = {
             ]
         },
         fruits: {
-            displayName: "Buah-buahan",
+            displayName: "Fruits",
             words: [
                 { en: "Apple", id: "apel" }, { en: "Banana", id: "pisang" },
                 { en: "Orange", id: "jeruk" }, { en: "Grape", id: "anggur" },
@@ -24,7 +24,7 @@ const GAME_DATA = {
             ]
         },
         objects: {
-            displayName: "Benda di Rumah",
+            displayName: "Objects in the house",
             words: [
                 { en: "Table", id: "meja" }, { en: "Chair", id: "kursi" },
                 { en: "Book", id: "buku" }, { en: "Door", id: "pintu" },
@@ -42,7 +42,7 @@ const GAME_DATA = {
             ]
         },
         verbs: {
-            displayName: "Kata Kerja",
+            displayName: "Verbs",
             words: [
                 { en: "Eat", id: "makan" }, { en: "Drink", id: "minum" },
                 { en: "Run", id: "lari" }, { en: "Walk", id: "jalan" },
@@ -51,7 +51,7 @@ const GAME_DATA = {
             ]
         },
         numbers: {
-            displayName: "Angka",
+            displayName: "Numbers",
             words: [
                 { en: "One", id: "1" }, { en: "Two", id: "2" },
                 { en: "Three", id: "3" }, { en: "Four", id: "4" },
@@ -61,7 +61,7 @@ const GAME_DATA = {
             ]
         },
         simpleSentences: {
-            displayName: "Menyusun Kalimat",
+            displayName: "Simple Sentences",
             words: [
                 { en: "I see a red car" },
                 { en: "She is reading a book" },
