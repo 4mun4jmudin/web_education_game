@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pratinjau Game - Petualangan Penjelajah Bahasa</title>
+    
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Memuat Font dari Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f9ff; /* bg-blue-50 */
+        }
+        .font-fredoka {
+            font-family: 'Fredoka One', cursive;
+        }
+        .game-object {
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .game-object:hover {
+            transform: scale(1.1);
+        }
+        .collected {
+            transform: scale(0);
+            transition: transform 0.5s ease;
+        }
+        .modal {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+        
+        <!-- === LAYAR MENU UTAMA === -->
+        <div id="screen-main-menu" class="p-8 text-center">
+            <h1 class="text-4xl sm:text-5xl font-fredoka text-blue-600">Petualangan Penjelajah Bahasa</h1>
+            <p class="text-gray-500 mt-2">Pilih petualanganmu!</p>
+            <div class="mt-8 space-y-4">
+                <button id="start-story-mode" class="w-full max-w-sm bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <i class="fas fa-book-open mr-2"></i> Mulai Mode Cerita
+                </button>
+                <button id="start-sentence-builder" class="w-full max-w-sm bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-full text-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                   <i class="fas fa-magic-sparkles mr-2"></i> ✨ Tantangan Kalimat
+                </button>
+            </div>
+        </div>
+
+        <!-- === LAYAR GAMEPLAY UTAMA === -->
+        <div id="screen-gameplay" class="hidden">
+             <!-- Header Game -->
+            <header class="p-4 bg-gray-50 border-b-2 border-gray-100 flex justify-between items-center">
+                <h1 id="level-title" class="text-xl sm:text-2xl font-fredoka text-blue-600"></h1>
+                <div class="text-lg font-bold">Skor: <span id="score">0</span></div>
+            </header>
+
+            <!-- Dunia Game -->
+            <div id="game-world" class="relative w-full h-96 sm:h-[500px] bg-green-200">
+                <!-- Gambar Latar Belakang diganti di JS -->
+            </div>
+
+            <!-- Panel UI Misi -->
+            <div id="ui-panel" class="p-4 bg-gray-100 border-t-2 border-gray-200 min-h-[80px]">
+                <div id="quest-text" class="text-center text-blue-800 font-semibold text-lg"></div>
+                <div id="fun-fact-container" class="text-center mt-2 hidden">
+                     <button id="fun-fact-button" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-full">
+                        ✨ Fakta Menarik!
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- === MODALS UNTUK MINI-GAMES === -->
+
+        <!-- Modal Pilihan Ganda -->
+        <div id="modal-multiple-choice" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-10">
+            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                 <h3 id="mc-question" class="text-2xl font-bold text-gray-800 mb-6"></h3>
+                 <div id="mc-options" class="grid grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+        
+        <!-- Modal Dengarkan & Tulis -->
+        <div id="modal-listen-write" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-10">
+            <div class="bg-teal-50 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                <h3 class="text-xl font-bold text-teal-800 mb-4">Dengarkan & Tulis</h3>
+                <button id="lw-play-sound" class="text-teal-600 hover:text-teal-800 mb-4"><i class="fas fa-volume-up fa-4x"></i></button>
+                <input id="lw-input" type="text" class="w-full text-center text-xl p-3 rounded-lg border-2 border-teal-300 focus:ring-teal-500 focus:border-teal-500" placeholder="Ketik jawabanmu...">
+                <button id="lw-submit" class="mt-6 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full text-lg">Cek Jawaban</button>
+            </div>
+        </div>
+
+        <!-- Modal Ucapkan Kata -->
+        <div id="modal-speak-word" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-10">
+             <div class="bg-red-50 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                <h3 class="text-xl font-bold text-red-800 mb-4">Ucapkan Kata Berikut:</h3>
+                <p id="sw-word-to-say" class="text-4xl font-bold text-red-600 mb-4"></p>
+                <button id="sw-mic-button" class="text-red-500 hover:text-red-700 h-24 w-24 rounded-full border-4 border-red-200 flex items-center justify-center mx-auto transition-colors"><i id="sw-mic-icon" class="fas fa-microphone fa-3x"></i></button>
+                <p id="sw-status" class="mt-4 text-gray-600 h-6">Tekan untuk bicara</p>
+            </div>
+        </div>
+
+        <!-- Modal Tantangan Kalimat -->
+        <div id="modal-sentence-builder" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-10">
+            <div class="bg-purple-50 rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
+                <h3 class="text-2xl font-bold font-fredoka text-purple-800">✨ Tantangan Kalimat</h3>
+                <p class="my-4 text-gray-700">Buat kalimat menggunakan kata: <strong id="sb-keyword" class="text-purple-600 text-2xl"></strong></p>
+                <textarea id="sb-textarea" class="w-full text-lg p-3 rounded-lg border-2 border-purple-300 focus:ring-purple-500 focus:border-purple-500" rows="3" placeholder="Tulis kalimatmu di sini..."></textarea>
+                <button id="sb-submit" class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-8 rounded-full text-lg">Periksa Kalimatku!</button>
+                 <div id="sb-feedback" class="mt-4 p-3 rounded-lg bg-purple-100 text-purple-800 hidden"></div>
+                 <div id="sb-loader" class="mt-4 justify-center hidden"><div class="spinner"></div></div>
+            </div>
+        </div>
+        
+        <!-- Modal Fakta Menarik -->
+        <div id="modal-fun-fact" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-20">
+            <div class="bg-yellow-100 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                <h3 class="text-2xl font-fredoka text-yellow-800 mb-4">✨ Fakta Menarik!</h3>
+                <div id="ff-content" class="text-lg text-yellow-900 min-h-[80px] flex items-center justify-center">
+                    <div id="ff-loader" class="spinner"></div>
+                    <p id="ff-text"></p>
+                </div>
+                <button id="ff-close" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-full">Tutup</button>
+            </div>
+        </div>
+
+        <!-- Modal Level Selesai -->
+        <div id="modal-level-complete" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-10">
+             <div class="bg-amber-50 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                <i class="fas fa-star text-amber-400 text-7xl mb-4"></i>
+                <h3 class="text-3xl font-fredoka text-amber-600">Level Selesai!</h3>
+                <p class="text-xl mt-2">Skor Akhir Kamu:</p>
+                <p id="final-score" class="text-5xl font-bold my-4"></p>
+                <button id="lc-back-to-menu" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg">Kembali ke Menu</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // === KONFIGURASI DAN DATA GAME ===
+        const API_KEY = ""; // Kunci API tidak diperlukan untuk model Flash di Vertex AI
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+        
+        const gameData = {
+            levels: [
+                {
+                    levelName: "Pulau Hewan",
+                    backgroundImage: 'https://placehold.co/800x600/a7f3d0/34d399?text=Pulau+Hewan',
+                    interactableObjects: [
+                        { name: 'monkey', sprite: '🐵' }, { name: 'tiger', sprite: '🐯' },
+                        { name: 'elephant', sprite: '🐘' }, { name: 'lion', sprite: '🦁' },
+                        { name: 'panda', sprite: '🐼' },
+                    ],
+                    quests: [
+                        { type: 'findAndTap', question: 'Cari monyet!', correctAnswer: 'monkey' },
+                        { type: 'multipleChoice', question: 'Which one is the elephant?', correctAnswer: 'elephant', options: ['tiger', 'lion', 'panda', 'elephant'] },
+                        { type: 'findAndTap', question: 'Cari singa!', correctAnswer: 'lion' },
+                        { type: 'listenAndWrite', question: 'Listen and type the animal name.', correctAnswer: 'tiger', audioText: 'tiger' },
+                        { type: 'speakTheWord', question: 'Let\'s practice. Say the word: "Panda"', correctAnswer: 'panda' },
+                    ]
+                }
+            ]
+        };
+
+        const gameState = {
+            currentLevelIndex: 0,
+            currentQuestIndex: 0,
+            score: 0
+        };
+
+        // === ELEMEN DOM ===
+        const screens = { mainMenu: document.getElementById('screen-main-menu'), gameplay: document.getElementById('screen-gameplay') };
+        const modals = { mcq: document.getElementById('modal-multiple-choice'), listen: document.getElementById('modal-listen-write'), speak: document.getElementById('modal-speak-word'), levelComplete: document.getElementById('modal-level-complete'), sentenceBuilder: document.getElementById('modal-sentence-builder'), funFact: document.getElementById('modal-fun-fact'), };
+        const levelTitle = document.getElementById('level-title');
+        const gameWorld = document.getElementById('game-world');
+        const questText = document.getElementById('quest-text');
+        const scoreDisplay = document.getElementById('score');
+        const funFactContainer = document.getElementById('fun-fact-container');
+        
+        // === FUNGSI PEMANGGILAN GEMINI API ===
+        async function callGemini(prompt) {
+            try {
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                const response = await fetch(GEMINI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                    return result.candidates[0].content.parts[0].text;
+                }
+                return "Maaf, saya tidak bisa memberikan respons saat ini.";
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return "Terjadi kesalahan saat menghubungi AI.";
+            }
+        }
+        
+        // === LOGIKA GAME ===
+        function speak(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); } }
+        function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.add('hidden')); if (screens[screenName]) { screens[screenName].classList.remove('hidden'); } }
+        function showModal(modalName, show = true) { Object.values(modals).forEach(m => m.classList.remove('show')); if (show && modals[modalName]) { modals[modalName].classList.add('show'); } }
+
+        async function startGame() {
+            const level = gameData.levels[gameState.currentLevelIndex];
+            gameState.currentQuestIndex = 0;
+            gameState.score = 0;
+            scoreDisplay.textContent = '0';
+            levelTitle.textContent = level.levelName;
+            gameWorld.style.backgroundImage = `url('${level.backgroundImage}')`;
+            showScreen('gameplay');
+            await startNextQuest();
+        }
+
+        async function startNextQuest() {
+            const level = gameData.levels[gameState.currentLevelIndex];
+            funFactContainer.classList.add('hidden');
+            if (gameState.currentQuestIndex >= level.quests.length) {
+                levelComplete();
+                return;
+            }
+
+            const quest = level.quests[gameState.currentQuestIndex];
+            showModal(null, false);
+
+            if (quest.type === 'findAndTap') {
+                questText.textContent = 'Membuat cerita...';
+                const storyPrompt = `Buat cerita satu kalimat yang sangat pendek dan menyenangkan untuk anak yang harus menemukan seekor ${quest.correctAnswer}. Contoh: "Oh tidak! ${quest.correctAnswer} kecil sedang bermain petak umpet. Bisakah kamu menemukannya?"`;
+                const story = await callGemini(storyPrompt);
+                questText.textContent = story;
+                spawnObjects();
+            } else if (quest.type === 'multipleChoice') {
+                questText.textContent = quest.question;
+                setupMultipleChoice(quest);
+                showModal('mcq');
+            } else if (quest.type === 'listenAndWrite') {
+                questText.textContent = quest.question;
+                setupListenWrite(quest);
+                showModal('listen');
+            } else if (quest.type === 'speakTheWord') {
+                questText.textContent = quest.question;
+                setupSpeakWord(quest);
+                showModal('speak');
+            }
+        }
+
+        function answerQuest(playerAnswer) {
+             const level = gameData.levels[gameState.currentLevelIndex];
+             const quest = level.quests[gameState.currentQuestIndex];
+
+             if(playerAnswer.toLowerCase().trim() === quest.correctAnswer.toLowerCase().trim()) {
+                 speak('Correct!');
+                 gameState.score += 10;
+                 scoreDisplay.textContent = gameState.score;
+                 
+                 // Tampilkan tombol fakta menarik
+                 if (quest.type === 'findAndTap') {
+                    const funFactButton = document.getElementById('fun-fact-button');
+                    funFactButton.onclick = () => showFunFact(quest.correctAnswer);
+                    funFactContainer.classList.remove('hidden');
+                 }
+                 
+                 gameState.currentQuestIndex++;
+                 setTimeout(startNextQuest, 1200);
+             } else {
+                 speak('Try again.');
+             }
+        }
+        
+        async function showFunFact(topic) {
+            showModal('funFact');
+            document.getElementById('ff-loader').style.display = 'block';
+            document.getElementById('ff-text').style.display = 'none';
+
+            const prompt = `Tell me a very simple, one-sentence fun fact about a ${topic} for a 7-year-old child learning English. The fact must be in English.`;
+            const fact = await callGemini(prompt);
+            
+            document.getElementById('ff-loader').style.display = 'none';
+            const ffText = document.getElementById('ff-text');
+            ffText.textContent = fact;
+            ffText.style.display = 'block';
+            speak(fact);
+        }
+
+        function spawnObjects() {
+            gameWorld.innerHTML = '';
+            const level = gameData.levels[gameState.currentLevelIndex];
+            level.interactableObjects.forEach(obj => {
+                const div = document.createElement('div');
+                div.className = 'game-object absolute text-5xl';
+                div.textContent = obj.sprite;
+                div.style.left = `${Math.random() * 85}%`;
+                div.style.top = `${Math.random() * 80}%`;
+                div.onclick = () => {
+                    if (obj.name === level.quests[gameState.currentQuestIndex].correctAnswer) {
+                         div.classList.add('collected');
+                         answerQuest(obj.name);
+                    } else {
+                         speak('That is a ' + obj.name);
+                    }
+                };
+                gameWorld.appendChild(div);
+            });
+        }
+        
+        function setupMultipleChoice(quest) {
+            const optionsContainer = document.getElementById('mc-options');
+            optionsContainer.innerHTML = '';
+            document.getElementById('mc-question').textContent = quest.question;
+            quest.options.sort(() => Math.random() - 0.5).forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg text-lg';
+                button.textContent = option;
+                button.onclick = () => { speak(option); answerQuest(option); };
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function setupListenWrite(quest) {
+            const input = document.getElementById('lw-input');
+            const playBtn = document.getElementById('lw-play-sound');
+            const submitBtn = document.getElementById('lw-submit');
+            input.value = '';
+            playBtn.onclick = () => speak(quest.audioText);
+            submitBtn.onclick = () => answerQuest(input.value);
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; recognition.lang = 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
+            recognition.onresult = (event) => { const spokenText = event.results[0][0].transcript; document.getElementById('sw-status').textContent = `Kamu bilang: "${spokenText}"`; answerQuest(spokenText); };
+            recognition.onspeechend = () => { recognition.stop(); document.getElementById('sw-mic-button').classList.remove('bg-red-300'); };
+            recognition.onerror = (event) => { document.getElementById('sw-status').textContent = 'Error: ' + event.error; };
+        }
+
+        function setupSpeakWord(quest) {
+            const micBtn = document.getElementById('sw-mic-button');
+            const wordDisplay = document.getElementById('sw-word-to-say');
+            const statusDisplay = document.getElementById('sw-status');
+            wordDisplay.textContent = `"${quest.correctAnswer}"`;
+            statusDisplay.textContent = 'Tekan untuk bicara';
+            if (!recognition) { statusDisplay.textContent = 'Fitur suara tidak didukung browser ini.'; micBtn.disabled = true; return; }
+            micBtn.onclick = () => { recognition.start(); statusDisplay.textContent = 'Mendengarkan...'; micBtn.classList.add('bg-red-300'); };
+        }
+
+        function setupSentenceBuilder() {
+            showScreen('gameplay'); // Sembunyikan menu, tampilkan background gameplay
+            gameWorld.innerHTML = ''; // Kosongkan dunia game
+            questText.textContent = "Mode Latihan: Membuat Kalimat";
+            showModal('sentenceBuilder');
+
+            const keywords = ['cat', 'dog', 'book', 'house', 'eat', 'run', 'happy'];
+            const randomWord = keywords[Math.floor(Math.random() * keywords.length)];
+            
+            const keywordDisplay = document.getElementById('sb-keyword');
+            const textarea = document.getElementById('sb-textarea');
+            const submitBtn = document.getElementById('sb-submit');
+            const feedbackBox = document.getElementById('sb-feedback');
+            const loader = document.getElementById('sb-loader');
+
+            keywordDisplay.textContent = `"${randomWord}"`;
+            textarea.value = '';
+            feedbackBox.classList.add('hidden');
+            loader.classList.add('hidden');
+
+            submitBtn.onclick = async () => {
+                const sentence = textarea.value;
+                if (sentence.trim() === '') return;
+                
+                feedbackBox.classList.add('hidden');
+                loader.style.display = 'flex';
+                submitBtn.disabled = true;
+
+                const prompt = `A child learning English wrote this sentence: "${sentence}". The required word was "${randomWord}". First, check if the word "${randomWord}" is in the sentence. If not, say "Please use the word '${randomWord}' in your sentence.". If it is, check if the sentence is grammatically correct. If it is correct, say "Great job! That's a perfect sentence!". If it has a minor error, say "Almost! Try this:" and provide the corrected sentence. Respond in simple English.`;
+                const feedback = await callGemini(prompt);
+
+                loader.style.display = 'none';
+                feedbackBox.textContent = feedback;
+                feedbackBox.classList.remove('hidden');
+                submitBtn.disabled = false;
+                speak(feedback);
+            };
+        }
+
+        function levelComplete() {
+            document.getElementById('final-score').textContent = gameState.score;
+            showModal('levelComplete');
+        }
+
+        // === EVENT LISTENERS AWAL ===
+        document.getElementById('start-story-mode').onclick = startGame;
+        document.getElementById('start-sentence-builder').onclick = setupSentenceBuilder;
+        document.getElementById('lc-back-to-menu').onclick = () => { showModal(null, false); showScreen('mainMenu'); };
+        document.getElementById('ff-close').onclick = () => showModal('funFact', false);
+
+        // Mulai di menu utama
+        showScreen('mainMenu');
+    </script>
+</body>
+</html>

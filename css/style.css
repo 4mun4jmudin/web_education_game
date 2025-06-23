@@ -1,0 +1,380 @@
+/* css/style.css */
+
+/* ===== 1. DEFINISI VARIABEL & GAYA GLOBAL ===== */
+
+/* :root digunakan untuk mendefinisikan variabel CSS global.
+   Ini memudahkan kita jika ingin mengganti tema warna game nanti. */
+   :root {
+    --primary-bg: #f0f9ff; /* sky-50 */
+    --container-bg: #ffffff;
+    --primary-blue: #3b82f6; /* blue-500 */
+    --primary-blue-hover: #2563eb; /* blue-600 */
+    --secondary-gray: #e5e7eb; /* gray-200 */
+    --secondary-gray-hover: #d1d5db; /* gray-300 */
+    --accent-green: #22c55e; /* green-500 */
+    --accent-red: #ef4444; /* red-500 */
+    --accent-yellow: #f59e0b; /* amber-500 */
+    --text-dark: #1f2937; /* gray-800 */
+    --text-light: #4b5563; /* gray-600 */
+    --font-family: 'Nunito', sans-serif;
+}
+
+/* Reset dasar dan gaya untuk seluruh halaman */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+/* ===== 2. STRUKTUR UTAMA & MANAJEMEN LAYAR ===== */
+
+/* Kontainer utama game, didesain seperti aplikasi mobile */
+#game-container {
+    width: 100%;
+    max-width: 420px; /* Lebar maksimal ideal untuk tampilan HP */
+    height: 80vh;
+    max-height: 800px;
+    background-color: var(--container-bg);
+    border-radius: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Menyembunyikan konten yang keluar dari kontainer */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Pengaturan dasar untuk semua layar game */
+.screen {
+    display: none; /* Semua layar disembunyikan secara default */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Layar yang aktif akan ditampilkan */
+.screen.active {
+    display: flex;
+}
+
+/* Animasi sederhana saat layar muncul */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+
+/* ===== 3. GAYA KOMPONEN YANG DAPAT DIGUNAKAN KEMBALI ===== */
+
+/* Tombol (Buttons) */
+.btn-primary, .btn-secondary, .btn-icon {
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 90%;
+    max-width: 300px;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+.btn-primary:hover {
+    background-color: var(--primary-blue-hover);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-gray);
+    color: var(--text-dark);
+}
+.btn-secondary:hover {
+    background-color: var(--secondary-gray-hover);
+}
+
+.btn-icon {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    font-size: 1.5rem;
+    background-color: var(--secondary-gray);
+}
+
+/* Teks (Titles, Subtitles, etc) */
+.title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--primary-blue);
+    margin-bottom: 1.5rem;
+}
+
+.subtitle {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Ilustrasi */
+.main-illustration {
+    width: 50%;
+    max-width: 150px;
+    margin-bottom: 2rem;
+}
+.result-illustration {
+    width: 40%;
+    max-width: 120px;
+    margin-bottom: 1.5rem;
+}
+
+/* Elemen Loading */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--secondary-gray);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 2rem 0;
+}
+.loading-text {
+    color: var(--text-light);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ===== 4. GAYA SPESIFIK UNTUK SETIAP LAYAR ===== */
+
+/* Start Screen */
+#start-screen {
+    justify-content: center;
+}
+#start-screen .btn-primary {
+    margin-bottom: 1rem;
+}
+
+/* Game Screen */
+#game-screen {
+    justify-content: space-between;
+}
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--text-light);
+}
+.progress-bar-container {
+    flex-grow: 1;
+    height: 12px;
+    background-color: var(--secondary-gray);
+    border-radius: 6px;
+    margin: 0 1rem;
+}
+#progress-bar {
+    width: 0%; /* Lebar akan diubah oleh JavaScript */
+    height: 100%;
+    background-color: var(--accent-green);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+#challenge-container {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.game-footer {
+    width: 100%;
+}
+
+
+/* Level Complete Screen */
+#level-complete-screen .btn-primary {
+    margin-top: 2rem;
+}
+
+.final-score-text {
+    font-size: 1.25rem;
+    color: var(--text-light);
+}
+
+#level-score {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-dark);
+}
+
+
+/* Settings Screen */
+#settings-screen {
+    justify-content: flex-start;
+}
+.settings-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: #f9fafb; /* gray-50 */
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+}
+.settings-option label {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+#close-settings-btn {
+    margin-top: auto; /* Mendorong tombol ke bawah */
+}
+
+
+/* ===== 5. RESPONSIVE DESIGN UNTUK LAYAR LEBIH BESAR ===== */
+
+/* Media query ini akan aktif jika lebar layar 640px atau lebih (tablet, desktop) */
+@media (min-width: 640px) {
+    #game-container {
+        max-width: 480px; /* Sedikit lebih lebar di tablet */
+        height: 90vh;
+        max-height: 850px;
+    }
+
+    .title {
+        font-size: 3rem;
+    }
+}
+/* ===== 6. GAYA UNTUK MODE PERMAINAN ===== */
+
+/* --- Mode: VocabularyMatch --- */
+.instruction {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+.image-container {
+    width: 100%;
+    height: 150px;
+    background-color: #f9fafb; /* gray-50 */
+    border-radius: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+}
+.challenge-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.display-text {
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--text-dark);
+}
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+}
+.btn-option {
+    border: 2px solid var(--secondary-gray);
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+.btn-option.correct {
+    background-color: #dcfce7; /* green-100 */
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+.btn-option.incorrect {
+    background-color: #fee2e2; /* red-100 */
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+    opacity: 0.7;
+}
+
+/* --- Mode: ListenAndType --- */
+.btn-play-sound {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    color: var(--primary-blue);
+    transition: transform 0.2s ease;
+}
+.btn-play-sound:hover {
+    transform: scale(1.1);
+}
+.input-area {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+#text-input {
+    width: 90%;
+    max-width: 300px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border: 2px solid var(--secondary-gray);
+    border-radius: 0.75rem;
+    text-align: center;
+}
+#text-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+}
+#text-input.correct {
+    background-color: #dcfce7;
+    border-color: var(--accent-green);
+}
+#text-input.incorrect {
+    background-color: #fee2e2;
+    border-color: var(--accent-red);
+}
+.correct-answer-text {
+    margin-top: 0.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
