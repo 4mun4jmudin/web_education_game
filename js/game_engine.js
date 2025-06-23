@@ -1,81 +1,79 @@
-// File: js/game_engine.js
+// File: js/game_engine.js (Final & Disesuaikan)
 
 class GameEngine {
   constructor(uiManager, speechHandler, aiHandler) {
     this.ui = uiManager;
     this.speech = speechHandler;
-    this.ai = aiHandler; // Referensi ke AI Handler
-    this.currentLevel = 0;
+    this.ai = aiHandler;
     this.score = 0;
     this.levelData = null;
     this.challenges = [];
     this.currentChallengeIndex = 0;
     this.gameModes = {};
-    this.usedCategories = []; // Untuk mencegah pengulangan kategori secara langsung
   }
 
   registerGameMode(name, modeObject) {
     this.gameModes[name] = modeObject;
-    modeObject.engine = this; // Beri akses ke engine
+    modeObject.engine = this;
   }
 
-  startNextAdventure() {
-    this.currentLevel++;
-    this.generateNewLevelData();
-    this.prepareChallenges();
+  startGame(categoryName) {
+    this.score = 0;
     this.currentChallengeIndex = 0;
+
+    // Logika Cerdas untuk Memilih Mode Permainan yang Tepat
+    let availableModes;
+
+    // Profil 1: Kategori Kalimat
+    // Metode: Menyusun kalimat & mendengarkan.
+    if (categoryName === "simpleSentences") {
+      availableModes = ["SentenceBuilder", "ListenAndType"];
+    }
+    // Profil 2: Kategori dengan Gambar Jelas (Benda, Hewan, Warna, dll.)
+    // Metode: Kombinasi visual (mencocokkan), mendengar, dan berbicara.
+    else if (
+      [
+        "animals",
+        "fruits",
+        "objects",
+        "transportation",
+        "colors",
+        "shapes2D",
+        "shapes3D",
+        "numbers",
+      ].includes(categoryName)
+    ) {
+      availableModes = ["VocabularyMatch", "ListenAndType", "SpeakTheWord"];
+    }
+    // Profil 3: Kategori Abstrak/Aksi (Kata Kerja)
+    // Metode: Fokus pada mendengar dan berbicara, karena gambar statis kurang efektif.
+    else if (categoryName === "verbs") {
+      availableModes = ["ListenAndType", "SpeakTheWord"];
+    }
+    // Pilihan aman untuk kategori tak terduga di masa depan.
+    else {
+      availableModes = ["ListenAndType"];
+    }
+
+    // Pilih satu mode secara acak dari daftar yang paling sesuai.
+    const randomModeName =
+      availableModes[Math.floor(Math.random() * availableModes.length)];
+
+    this.levelData = {
+      gameMode: randomModeName,
+      category: categoryName,
+      challengesCount: 5,
+    };
+
+    this.prepareChallenges();
 
     const categoryDisplayName =
       GAME_DATA.categories[this.levelData.category].displayName;
-    this.ui.updateLevelIndicator(
-      `Adventure ${this.currentLevel}: ${categoryDisplayName}`
-    );
+    this.ui.updateLevelIndicator(`Topik: ${categoryDisplayName}`);
     this.ui.updateScoreIndicator(this.score);
     this.ui.showScreen("game");
 
     this.nextChallenge();
-  }
-
-  generateNewLevelData() {
-    let availableCategories = Object.keys(GAME_DATA.categories).filter(
-      (cat) => !this.usedCategories.includes(cat)
-    );
-    if (availableCategories.length === 0) {
-      this.usedCategories = []; // Reset jika semua sudah dipakai
-      availableCategories = Object.keys(GAME_DATA.categories);
-    }
-
-    const randomCategoryName =
-      availableCategories[
-        Math.floor(Math.random() * availableCategories.length)
-      ];
-    this.usedCategories.push(randomCategoryName);
-
-    const availableModes = Object.keys(this.gameModes);
-    let filteredModes;
-
-    if (randomCategoryName === "simpleSentences") {
-      filteredModes = ["SentenceBuilder", "ListenAndType"];
-    } else if (
-      randomCategoryName === "verbs" ||
-      randomCategoryName === "objects" ||
-      randomCategoryName === "transportation" ||
-      randomCategoryName === "animals" ||
-      randomCategoryName === "fruits"
-    ) {
-      filteredModes = ["VocabularyMatch", "ListenAndType", "SpeakTheWord"];
-    } else {
-      filteredModes = ["VocabularyMatch", "ListenAndType"];
-    }
-
-    const randomModeName =
-      filteredModes[Math.floor(Math.random() * filteredModes.length)];
-
-    this.levelData = {
-      gameMode: randomModeName,
-      category: randomCategoryName,
-      challengesCount: 5, // Setiap petualangan punya 5 tantangan
-    };
   }
 
   prepareChallenges() {
@@ -83,17 +81,13 @@ class GameEngine {
     const categoryWords = [
       ...GAME_DATA.categories[this.levelData.category].words,
     ];
-
-    // Acak urutan kata
     categoryWords.sort(() => 0.5 - Math.random());
-
     this.challenges = categoryWords.slice(0, this.levelData.challengesCount);
   }
 
   async nextChallenge() {
-    // Dibuat async untuk menunggu instruksi dari AI
     if (this.currentChallengeIndex >= this.challenges.length) {
-      this.completeLevel();
+      this.completeSession();
       return;
     }
 
@@ -107,18 +101,18 @@ class GameEngine {
     const mode = this.gameModes[modeName];
 
     if (mode) {
-      // Minta AI untuk membuat instruksi dinamis
       const dynamicInstruction = await this.ai.createDynamicInstruction(
         modeName,
         categoryName,
         challengeData
       );
+      const categoryWordList = GAME_DATA.categories[categoryName].words;
 
-      // Mulai mode permainan dengan instruksi dari AI
       mode.start(
         challengeData,
         (isCorrect) => this.submitAnswer(isCorrect),
-        dynamicInstruction
+        dynamicInstruction,
+        categoryWordList
       );
     } else {
       console.error(`Game Mode "${modeName}" tidak terdaftar!`);
@@ -133,24 +127,20 @@ class GameEngine {
     }
 
     this.currentChallengeIndex++;
-
-    // Jeda singkat sebelum lanjut ke tantangan berikutnya
     setTimeout(() => {
       this.nextChallenge();
-    }, 1200); // 1.2 detik
+    }, 1200);
   }
 
-  completeLevel() {
+  completeSession() {
     this.ui.updateProgressBar(this.challenges.length, this.challenges.length);
     this.ui.showLevelCompleteScreen(this.score, () => {
-      this.startNextAdventure();
+      this.ui.showScreen("start");
     });
   }
 
   quitGame() {
     this.score = 0;
-    this.currentLevel = 0;
-    this.usedCategories = [];
     this.ui.showScreen("start");
   }
 }

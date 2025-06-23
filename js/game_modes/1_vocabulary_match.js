@@ -1,26 +1,23 @@
-// File: js/game_modes/1_vocabulary_match.js
+// File: js/game_modes/1_vocabulary_match.js (Final)
 
 class VocabularyMatchMode {
-  constructor(ui, speech, gameData) {
+  constructor(ui, speech) {
     this.ui = ui;
     this.speech = speech;
-    this.gameData = gameData;
     this.engine = null; // Di-set oleh GameEngine saat registrasi
     this.onSubmit = null;
     this.challengeData = null;
   }
 
-  start(challengeData, onSubmitCallback, dynamicInstruction) {
-    // Menerima instruksi dinamis
+  start(challengeData, onSubmitCallback, dynamicInstruction, categoryWordList) {
     this.challengeData = challengeData;
     this.onSubmit = onSubmitCallback;
     const correctAnswer = this.challengeData.en;
     const imageId = this.challengeData.id;
 
-    // Ambil 3 pilihan salah dari kategori yang sama
-    const categoryWords =
-      this.gameData.categories[this.engine.levelData.category].words;
-    const wrongOptions = categoryWords
+    // Ambil 3 pilihan salah dari `categoryWordList` yang sudah disediakan oleh GameEngine.
+    // Ini memastikan pilihan salah PASTI berasal dari kategori yang benar.
+    const wrongOptions = categoryWordList
       .filter((w) => w.en !== correctAnswer)
       .sort(() => 0.5 - Math.random())
       .slice(0, 3)
@@ -30,7 +27,6 @@ class VocabularyMatchMode {
       () => 0.5 - Math.random()
     );
 
-    // Gunakan instruksi dari AI, atau gunakan default jika AI gagal/kosong
     const instruction =
       dynamicInstruction || `Choose the correct word for the image.`;
     this.ui.drawInstruction(instruction);
@@ -46,12 +42,10 @@ class VocabularyMatchMode {
             </div>
         `;
     this.ui.drawChallenge(challengeHtml);
-    this.ui.drawUserInput(""); // Pastikan area input bawah kosong
+    this.ui.drawUserInput("");
 
-    // Mainkan suara kata sebagai petunjuk
     this.speech.speak(correctAnswer);
 
-    // Tambahkan event listener ke setiap tombol pilihan
     document.querySelectorAll(".btn-option").forEach((button) => {
       button.addEventListener("click", (e) =>
         this.handleOptionClick(e, correctAnswer)
@@ -63,12 +57,10 @@ class VocabularyMatchMode {
     const selectedAnswer = event.target.textContent;
     const isCorrect = selectedAnswer === correctAnswer;
 
-    // Nonaktifkan semua tombol untuk mencegah klik ganda
     document
       .querySelectorAll(".btn-option")
       .forEach((btn) => (btn.disabled = true));
 
-    // Kirim hasil ke GameEngine
     this.onSubmit(isCorrect);
   }
 }

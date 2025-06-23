@@ -26,21 +26,17 @@
       </div>
 
       <div id="start-screen" class="screen">
-        <h1 class="title">Petualangan<br />Bahasa Inggris</h1>
-        <img
-          src="assets/images/ui/star-svgrepo-com.svg"
-          alt="Ilustrasi Petualangan"
-          class="main-illustration"
-        />
-        <button id="start-game-btn" class="btn-primary">
-          Mulai Petualangan!
-        </button>
+        <h1 class="title">Ayo Belajar!</h1>
+        <h2 class="subtitle" style="font-size: 1.5em; margin-bottom: 20px;">Pilih Topik Belajar</h2>
+        
+        <div id="category-selection-container" class="category-grid">
+          </div>
+
         <button id="settings-btn" class="btn-icon">⚙️</button>
       </div>
-
       <div id="game-screen" class="screen">
         <div class="game-header">
-          <span id="level-indicator">Level 1</span>
+          <span id="level-indicator">Kategori</span>
           <div class="progress-bar-container">
             <div id="progress-bar"></div>
           </div>
@@ -59,7 +55,7 @@
       </div>
 
       <div id="level-complete-screen" class="screen">
-        <h2 class="subtitle">Level Selesai!</h2>
+        <h2 class="subtitle">Sesi Selesai!</h2>
         <img
           src="assets/images/ui/star-svgrepo-com.svg"
           alt="Bintang"
@@ -69,7 +65,7 @@
           Skor Akhir: <span id="level-score">0</span>
         </p>
         <button id="next-level-btn" class="btn-primary">
-          Lanjut ke Petualangan Berikutnya
+          Pilih Topik Lain
         </button>
       </div>
 

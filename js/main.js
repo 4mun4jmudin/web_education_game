@@ -1,23 +1,21 @@
-// File: js/main.js
+// File: js/main.js (Penyesuaian kecil)
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================================
-  // ▼▼▼ SIMPAN API KEY ANDA DI SINI ▼▼▼
-  // ==========================================================
   const GEMINI_API_KEY = "AIzaSyCxtPxGJg1tsHcd-M61M3wRVibrLtzE2dU";
-  // ==========================================================
 
-  // 1. Inisialisasi semua modul utama
   const ui = new UIManager();
   const speech = new SpeechHandler();
-  const ai = new AIHandler(GEMINI_API_KEY); // Inisialisasi AI Handler
-  const engine = new GameEngine(ui, speech, ai); // Berikan ai ke engine
+  const ai = new AIHandler(GEMINI_API_KEY);
+  const engine = new GameEngine(ui, speech, ai);
 
-  // 2. Daftarkan semua mode permainan
+  // ▼▼▼ BARIS INI DIPERBAIKI ▼▼▼
+  // Hapus `GAME_DATA` dari parameter saat membuat VocabularyMatchMode.
   engine.registerGameMode(
     "VocabularyMatch",
-    new VocabularyMatchMode(ui, speech, GAME_DATA)
+    new VocabularyMatchMode(ui, speech)
   );
+  // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
+
   engine.registerGameMode("ListenAndType", new ListenAndTypeMode(ui, speech));
   engine.registerGameMode("SpeakTheWord", new SpeakTheWordMode(ui, speech));
   engine.registerGameMode(
@@ -25,17 +23,31 @@ document.addEventListener("DOMContentLoaded", () => {
     new SentenceBuilderMode(ui, speech)
   );
 
-  // 3. Siapkan event listener
-  const startGameBtn = document.getElementById("start-game-btn");
-  startGameBtn.addEventListener("click", () => {
-    engine.startNextAdventure();
-  });
+  function setupCategorySelection() {
+    const container = document.getElementById("category-selection-container");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const categories = GAME_DATA.categories;
+    for (const categoryKey in categories) {
+      const category = categories[categoryKey];
+      const button = document.createElement("button");
+      button.textContent = category.displayName;
+      button.className = "btn-category";
+      button.addEventListener("click", () => {
+        engine.startGame(categoryKey);
+      });
+      container.appendChild(button);
+    }
+  }
 
   const quitGameBtn = document.getElementById("quit-game-btn");
   quitGameBtn.addEventListener("click", () => {
     engine.quitGame();
   });
 
-  // 4. Tampilkan layar awal
+  setupCategorySelection();
+
   ui.showScreen("start");
 });
