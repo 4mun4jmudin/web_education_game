@@ -1,63 +1,74 @@
-// js/game_modes/1_vocabulary_match.js
+// File: js/game_modes/1_vocabulary_match.js
 
 class VocabularyMatchMode {
-    constructor(ui, gameData, engine) {
-        this.ui = ui;
-        this.gameData = gameData;
-        this.engine = engine; // Referensi ke engine untuk mendapatkan level/kategori saat ini
-    }
+  constructor(ui, speech, gameData) {
+    this.ui = ui;
+    this.speech = speech;
+    this.gameData = gameData;
+    this.engine = null; // Di-set oleh GameEngine saat registrasi
+    this.onSubmit = null;
+    this.challengeData = null;
+  }
 
-    start(challengeData, onSubmitCallback) {
-        // Ambil kategori dari data level saat ini di engine
-        const category = this.engine.levelData.category;
-        // Ambil semua kata dari kategori tersebut, kecuali kata yang menjadi jawaban
-        const wordPool = this.gameData.categories[category].words.filter(w => w.en !== challengeData.en);
-        // Acak dan ambil 3 kata sebagai pilihan yang salah
-        const shuffledPool = [...wordPool].sort(() => 0.5 - Math.random());
-        const wrongOptions = shuffledPool.slice(0, 3).map(w => w.en);
+  start(challengeData, onSubmitCallback, dynamicInstruction) {
+    // Menerima instruksi dinamis
+    this.challengeData = challengeData;
+    this.onSubmit = onSubmitCallback;
+    const correctAnswer = this.challengeData.en;
+    const imageId = this.challengeData.id;
 
-        // Gabungkan jawaban benar dan salah, lalu acak posisinya
-        const options = [...wrongOptions, challengeData.en].sort(() => 0.5 - Math.random());
-        
-        // Tampilkan angka sebagai teks besar, atau gambar untuk kategori lain
-        const imageOrText = challengeData.display 
-            ? `<div class="display-text">${challengeData.display}</div>`
-            : `<img src="assets/images/placeholder.png" data-src="${challengeData.img}" alt="${challengeData.en}" class="challenge-image" onload="this.src=this.dataset.src" onerror="this.src='assets/images/placeholder.png'">`;
+    // Ambil 3 pilihan salah dari kategori yang sama
+    const categoryWords =
+      this.gameData.categories[this.engine.levelData.category].words;
+    const wrongOptions = categoryWords
+      .filter((w) => w.en !== correctAnswer)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3)
+      .map((w) => w.en);
 
-        // Buat HTML untuk tantangan
-        const html = `
-            <div id="instruction-text" class="instruction">Pilih kata yang benar:</div>
-            <div id="game-content">
-                <div class="image-container">
-                    ${imageOrText}
-                </div>
-                <div class="options-grid">
-                    ${options.map(opt => `<button class="btn-option">${opt}</button>`).join('')}
-                </div>
+    const options = [...wrongOptions, correctAnswer].sort(
+      () => 0.5 - Math.random()
+    );
+
+    // Gunakan instruksi dari AI, atau gunakan default jika AI gagal/kosong
+    const instruction =
+      dynamicInstruction || `Pilih kata yang sesuai untuk gambar ini.`;
+    this.ui.drawInstruction(instruction);
+
+    const challengeHtml = `
+            <div class="image-challenge-container">
+                <img src="assets/images/words/${imageId}.png" alt="${correctAnswer}" class="challenge-image">
+            </div>
+            <div class="options-grid">
+                ${options
+                  .map((opt) => `<button class="btn-option">${opt}</button>`)
+                  .join("")}
             </div>
         `;
-        this.ui.drawChallenge(html);
+    this.ui.drawChallenge(challengeHtml);
+    this.ui.drawUserInput(""); // Pastikan area input bawah kosong
 
-        // Tambahkan event listener untuk setiap tombol pilihan
-        const optionButtons = document.querySelectorAll('.btn-option');
-        optionButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const selectedAnswer = e.target.textContent;
-                const isCorrect = selectedAnswer === challengeData.en;
+    // Mainkan suara kata sebagai petunjuk
+    this.speech.speak(correctAnswer);
 
-                // Beri feedback visual pada semua tombol
-                optionButtons.forEach(btn => {
-                    btn.disabled = true; // Nonaktifkan semua tombol
-                    if (btn.textContent === challengeData.en) {
-                        btn.classList.add('correct');
-                    } else if (btn.textContent === selectedAnswer) {
-                        btn.classList.add('incorrect');
-                    }
-                });
+    // Tambahkan event listener ke setiap tombol pilihan
+    document.querySelectorAll(".btn-option").forEach((button) => {
+      button.addEventListener("click", (e) =>
+        this.handleOptionClick(e, correctAnswer)
+      );
+    });
+  }
 
-                // Kirim hasil ke game engine
-                onSubmitCallback(isCorrect);
-            });
-        });
-    }
+  handleOptionClick(event, correctAnswer) {
+    const selectedAnswer = event.target.textContent;
+    const isCorrect = selectedAnswer === correctAnswer;
+
+    // Nonaktifkan semua tombol untuk mencegah klik ganda
+    document
+      .querySelectorAll(".btn-option")
+      .forEach((btn) => (btn.disabled = true));
+
+    // Kirim hasil ke GameEngine
+    this.onSubmit(isCorrect);
+  }
 }

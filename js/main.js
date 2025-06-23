@@ -1,62 +1,41 @@
-// js/main.js
+// File: js/main.js
 
-// Event listener ini memastikan semua elemen HTML sudah dimuat
-// sebelum kita mencoba menjalankan kode JavaScript
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+  // ==========================================================
+  // ▼▼▼ SIMPAN API KEY ANDA DI SINI ▼▼▼
+  // ==========================================================
+  const GEMINI_API_KEY = "AIzaSyCxtPxGJg1tsHcd-M61M3wRVibrLtzE2dU";
+  // ==========================================================
 
-    // Inisialisasi semua komponen utama game
-    const ui = new UIManager();
-    const engine = new GameEngine(ui);
+  // 1. Inisialisasi semua modul utama
+  const ui = new UIManager();
+  const speech = new SpeechHandler();
+  const ai = new AIHandler(GEMINI_API_KEY); // Inisialisasi AI Handler
+  const engine = new GameEngine(ui, speech, ai); // Berikan ai ke engine
 
-    /**
-     * Inisialisasi Game
-     * - Menyiapkan semua event listener untuk tombol-tombol utama.
-     * - Menampilkan layar awal setelah loading.
-     */
-    function init() {
-        // --- EVENT LISTENERS UNTUK TOMBOL ---
+  // 2. Daftarkan semua mode permainan
+  engine.registerGameMode(
+    "VocabularyMatch",
+    new VocabularyMatchMode(ui, speech, GAME_DATA)
+  );
+  engine.registerGameMode("ListenAndType", new ListenAndTypeMode(ui, speech));
+  engine.registerGameMode("SpeakTheWord", new SpeakTheWordMode(ui, speech));
+  engine.registerGameMode(
+    "SentenceBuilder",
+    new SentenceBuilderMode(ui, speech)
+  );
 
-        // Tombol "Mulai Petualangan" di layar awal
-        const startGameBtn = document.getElementById('start-game-btn');
-        startGameBtn.addEventListener('click', () => {
-            engine.startLevel(1); // Mulai dari level 1
-        });
+  // 3. Siapkan event listener
+  const startGameBtn = document.getElementById("start-game-btn");
+  startGameBtn.addEventListener("click", () => {
+    engine.startNextAdventure();
+  });
 
-        // Tombol "Lanjut ke Level Berikutnya" di layar level selesai
-        const nextLevelBtn = document.getElementById('next-level-btn');
-        nextLevelBtn.addEventListener('click', () => {
-            engine.goToNextLevel();
-        });
-        
-        // Tombol Pengaturan
-        const settingsBtn = document.getElementById('settings-btn');
-        settingsBtn.addEventListener('click', () => {
-            ui.showScreen('settings');
-        });
-        
-        const closeSettingsBtn = document.getElementById('close-settings-btn');
-        closeSettingsBtn.addEventListener('click', () => {
-            ui.showScreen('start'); // Kembali ke layar awal dari pengaturan
-        });
-        
-        // Tombol Keluar dari game
-        const quitGameBtn = document.getElementById('quit-game-btn');
-        quitGameBtn.addEventListener('click', () => {
-            // Konfirmasi sebelum keluar
-            if (confirm("Apakah kamu yakin ingin keluar dari level ini?")) {
-                ui.showScreen('start');
-                // Di sini bisa ditambahkan logika untuk mereset skor jika diperlukan
-            }
-        });
+  const quitGameBtn = document.getElementById("quit-game-btn");
+  quitGameBtn.addEventListener("click", () => {
+    engine.quitGame();
+  });
 
-        // --- SIMULASI LOADING ---
-        // Tampilkan layar awal setelah 1.5 detik
-        setTimeout(() => {
-            ui.showScreen('start');
-        }, 1500);
-    }
-
-    // Panggil fungsi inisialisasi untuk memulai semuanya
-    init();
-
+  // 4. Tampilkan layar awal
+  ui.showScreen("start");
 });

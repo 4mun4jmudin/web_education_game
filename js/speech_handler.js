@@ -1,78 +1,66 @@
-// js/speech_handler.js
+// File: js/speech_handler.js (Final)
 
 class SpeechHandler {
-    constructor() {
-        this.synth = window.speechSynthesis;
-        this.recognition = null;
-        
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            this.recognition = new SpeechRecognition();
-            this.recognition.continuous = false;
-            this.recognition.lang = 'en-US';
-            this.recognition.interimResults = false;
-            this.recognition.maxAlternatives = 1;
-        } else {
-            console.warn("Speech Recognition API tidak didukung di browser ini.");
-        }
+  constructor() {
+    this.synth = window.speechSynthesis;
+    this.recognition = null;
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = false; // Hanya menangkap satu ucapan
+      this.recognition.lang = "en-US"; // Bahasa yang dikenali
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
+    } else {
+      console.warn("Speech Recognition tidak didukung di browser ini.");
+    }
+  }
+
+  /**
+   * Mengucapkan teks yang diberikan.
+   * @param {string} text - Teks yang akan diucapkan.
+   */
+  speak(text) {
+    if (this.synth.speaking) {
+      this.synth.cancel();
+    }
+    const utterThis = new SpeechSynthesisUtterance(text);
+    utterThis.lang = "en-US";
+    this.synth.speak(utterThis);
+  }
+
+  /**
+   * Mengenali ucapan dari mikrofon.
+   * @param {function} onResult - Callback saat ada hasil.
+   * @param {function} onEnd - Callback saat pengenalan selesai.
+   * @param {function} onError - Callback saat terjadi error.
+   */
+  recognize(onResult, onEnd, onError) {
+    if (!this.recognition) {
+      if (onError) onError("Not supported");
+      return;
     }
 
-    /**
-     * Mengucapkan teks menggunakan suara browser (Text-to-Speech).
-     * @param {string} text - Teks yang ingin diucapkan.
-     * @param {Function} [onEndCallback] - Callback opsional yang dijalankan setelah selesai bicara.
-     */
-    speak(text, onEndCallback) {
-        if (this.synth.speaking) {
-            this.synth.cancel();
-        }
-        // Pastikan suara sudah termuat sebelum mencoba bicara
-        let voices = this.synth.getVoices();
-        if (voices.length === 0) {
-            this.synth.onvoiceschanged = () => {
-                this.speak(text, onEndCallback);
-            };
-            return;
-        }
+    this.recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      if (onResult) onResult(transcript);
+    };
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        
-        utterance.onend = () => {
-            if (onEndCallback) {
-                onEndCallback();
-            }
-        };
+    this.recognition.onspeechend = () => {
+      this.recognition.stop();
+      if (onEnd) onEnd();
+    };
 
-        this.synth.speak(utterance);
-    }
+    this.recognition.onerror = (event) => {
+      if (onError) onError(event.error);
+    };
 
-    /**
-     * Mulai mendengarkan input suara dari pengguna (Speech-to-Text).
-     * @param {Function} onResultCallback - Callback yang dijalankan dengan hasil transkrip.
-     * @param {Function} onErrorCallback - Callback yang dijalankan jika ada error.
-     */
-    listen(onResultCallback, onErrorCallback) {
-        if (!this.recognition) {
-            if(onErrorCallback) onErrorCallback({ error: "not-supported" });
-            return;
-        }
+    this.recognition.onnomatch = (event) => {
+      if (onError) onError("No match");
+    };
 
-        this.recognition.start();
-
-        this.recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            if(onResultCallback) onResultCallback(transcript);
-        };
-
-        this.recognition.onspeechend = () => {
-            this.recognition.stop();
-        };
-
-        this.recognition.onerror = (event) => {
-            if(onErrorCallback) onErrorCallback(event);
-        };
-    }
+    this.recognition.start();
+  }
 }

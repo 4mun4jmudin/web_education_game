@@ -1,114 +1,156 @@
-// js/game_engine.js
+// File: js/game_engine.js
 
 class GameEngine {
-    constructor(uiManager) {
-        this.ui = uiManager; // Referensi ke UI Manager untuk memperbarui tampilan
-        this.currentLevel = 1;
-        this.score = 0;
-        this.levelData = null;
-        this.challenges = [];
-        this.currentChallengeIndex = 0;
+  constructor(uiManager, speechHandler, aiHandler) {
+    this.ui = uiManager;
+    this.speech = speechHandler;
+    this.ai = aiHandler; // Referensi ke AI Handler
+    this.currentLevel = 0;
+    this.score = 0;
+    this.levelData = null;
+    this.challenges = [];
+    this.currentChallengeIndex = 0;
+    this.gameModes = {};
+    this.usedCategories = []; // Untuk mencegah pengulangan kategori secara langsung
+  }
 
-        // NOTE: Nanti kita akan mendaftarkan semua mode game di sini
-        this.gameModes = {}; 
-    }
-    
-    // Fungsi untuk mendaftarkan mode permainan yang tersedia (dari folder game_modes)
-    registerGameMode(name, modeObject) {
-        this.gameModes[name] = modeObject;
-    }
+  registerGameMode(name, modeObject) {
+    this.gameModes[name] = modeObject;
+    modeObject.engine = this; // Beri akses ke engine
+  }
 
-    startLevel(levelNumber) {
-        this.currentLevel = levelNumber;
-        this.currentChallengeIndex = 0;
-        
-        // Cari data untuk level saat ini dari GAME_DATA
-        this.levelData = GAME_DATA.adventureLevels.find(l => l.level === this.currentLevel);
+  startNextAdventure() {
+    this.currentLevel++;
+    this.generateNewLevelData();
+    this.prepareChallenges();
+    this.currentChallengeIndex = 0;
 
-        if (!this.levelData) {
-            console.error(`Level ${this.currentLevel} tidak ditemukan!`);
-            alert("Selamat! Anda telah menyelesaikan semua level yang ada!");
-            this.ui.showScreen('start'); // Kembali ke menu utama jika level habis
-            return;
-        }
+    const categoryDisplayName =
+      GAME_DATA.categories[this.levelData.category].displayName;
+    this.ui.updateLevelIndicator(
+      `Petualangan ${this.currentLevel}: ${categoryDisplayName}`
+    );
+    this.ui.updateScoreIndicator(this.score);
+    this.ui.showScreen("game");
 
-        // Siapkan tantangan untuk level ini
-        this.prepareChallenges();
+    this.nextChallenge();
+  }
 
-        // Update UI awal untuk level baru
-        this.ui.updateLevelIndicator(this.currentLevel);
-        this.ui.updateScoreIndicator(this.score);
-        this.ui.updateProgressBar(0, this.challenges.length);
-        this.ui.showScreen('game');
-
-        // Mulai tantangan pertama
-        this.nextChallenge();
-    }
-
-    prepareChallenges() {
-        const category = this.levelData.category;
-        const wordList = [...GAME_DATA.categories[category].words]; // Salin daftar kata
-        
-        // Acak daftar kata dan ambil sejumlah yang dibutuhkan untuk tantangan
-        const shuffledWords = wordList.sort(() => 0.5 - Math.random());
-        this.challenges = shuffledWords.slice(0, this.levelData.challenges);
+  generateNewLevelData() {
+    let availableCategories = Object.keys(GAME_DATA.categories).filter(
+      (cat) => !this.usedCategories.includes(cat)
+    );
+    if (availableCategories.length === 0) {
+      this.usedCategories = []; // Reset jika semua sudah dipakai
+      availableCategories = Object.keys(GAME_DATA.categories);
     }
 
-    nextChallenge() {
-        // Jika tantangan sudah habis, level selesai
-        if (this.currentChallengeIndex >= this.challenges.length) {
-            this.completeLevel();
-            return;
-        }
+    const randomCategoryName =
+      availableCategories[
+        Math.floor(Math.random() * availableCategories.length)
+      ];
+    this.usedCategories.push(randomCategoryName);
 
-        const challengeData = this.challenges[this.currentChallengeIndex];
-        const gameModeName = this.levelData.gameMode;
-        const activeGameMode = this.gameModes[gameModeName];
+    const availableModes = Object.keys(this.gameModes);
+    let filteredModes;
 
-        if (activeGameMode) {
-             // Panggil mode game yang sesuai untuk memulai tantangan
-            activeGameMode.start(challengeData, this.submitAnswer.bind(this));
-        } else {
-            console.error(`Mode game "${gameModeName}" tidak terdaftar!`);
-        }
-        
-        // Update progress bar
-        this.ui.updateProgressBar(this.currentChallengeIndex, this.challenges.length);
+    if (randomCategoryName === "simpleSentences") {
+      filteredModes = ["SentenceBuilder", "ListenAndType"];
+    } else if (
+      randomCategoryName === "verbs" ||
+      randomCategoryName === "objects" ||
+      randomCategoryName === "transportation" ||
+      randomCategoryName === "animals" ||
+      randomCategoryName === "fruits"
+    ) {
+      filteredModes = ["VocabularyMatch", "ListenAndType", "SpeakTheWord"];
+    } else {
+      filteredModes = ["VocabularyMatch", "ListenAndType"];
     }
 
-    // Fungsi ini akan dipanggil oleh mini-game saat pemain menjawab
-    submitAnswer(isCorrect) {
-        if (isCorrect) {
-            this.score += 10; // Tambah 10 poin untuk jawaban benar
-            this.ui.updateScoreIndicator(this.score);
-            // NOTE: Di sini bisa ditambahkan efek suara atau visual "Benar!"
-        } else {
-             // NOTE: Di sini bisa ditambahkan efek suara atau visual "Salah!"
-        }
+    const randomModeName =
+      filteredModes[Math.floor(Math.random() * filteredModes.length)];
 
-        this.currentChallengeIndex++;
+    this.levelData = {
+      gameMode: randomModeName,
+      category: randomCategoryName,
+      challengesCount: 5, // Setiap petualangan punya 5 tantangan
+    };
+  }
 
-        // Lanjut ke tantangan berikutnya setelah jeda singkat
-        setTimeout(() => {
-            this.nextChallenge();
-        }, 1500); // Jeda 1.5 detik
+  prepareChallenges() {
+    this.challenges = [];
+    const categoryWords = [
+      ...GAME_DATA.categories[this.levelData.category].words,
+    ];
+
+    // Acak urutan kata
+    categoryWords.sort(() => 0.5 - Math.random());
+
+    this.challenges = categoryWords.slice(0, this.levelData.challengesCount);
+  }
+
+  async nextChallenge() {
+    // Dibuat async untuk menunggu instruksi dari AI
+    if (this.currentChallengeIndex >= this.challenges.length) {
+      this.completeLevel();
+      return;
     }
 
-    completeLevel() {
-        // Logika sederhana untuk menentukan jumlah bintang
-        const totalChallenges = this.challenges.length;
-        const correctAnswers = this.score / 10 - (this.currentLevel > 1 ? (this.currentLevel-1) * 5 : 0) ; // perlu penyesuaian skor antar level
-        const accuracy = (correctAnswers / totalChallenges);
-        let stars = 1;
-        if (accuracy > 0.6) stars = 2;
-        if (accuracy >= 0.9) stars = 3;
+    this.ui.updateProgressBar(
+      this.currentChallengeIndex,
+      this.challenges.length
+    );
+    const challengeData = this.challenges[this.currentChallengeIndex];
+    const modeName = this.levelData.gameMode;
+    const categoryName = this.levelData.category;
+    const mode = this.gameModes[modeName];
 
-        // Tampilkan layar level selesai melalui UI Manager
-        this.ui.showLevelCompleteResults(this.score, stars);
+    if (mode) {
+      // Minta AI untuk membuat instruksi dinamis
+      const dynamicInstruction = await this.ai.createDynamicInstruction(
+        modeName,
+        categoryName,
+        challengeData
+      );
+
+      // Mulai mode permainan dengan instruksi dari AI
+      mode.start(
+        challengeData,
+        (isCorrect) => this.submitAnswer(isCorrect),
+        dynamicInstruction
+      );
+    } else {
+      console.error(`Game Mode "${modeName}" tidak terdaftar!`);
     }
-    
-    // Pindah ke level selanjutnya
-    goToNextLevel() {
-        this.startLevel(this.currentLevel + 1);
+  }
+
+  submitAnswer(isCorrect) {
+    this.ui.showFeedback(isCorrect);
+    if (isCorrect) {
+      this.score += 10;
+      this.ui.updateScoreIndicator(this.score);
     }
+
+    this.currentChallengeIndex++;
+
+    // Jeda singkat sebelum lanjut ke tantangan berikutnya
+    setTimeout(() => {
+      this.nextChallenge();
+    }, 1200); // 1.2 detik
+  }
+
+  completeLevel() {
+    this.ui.updateProgressBar(this.challenges.length, this.challenges.length);
+    this.ui.showLevelCompleteScreen(this.score, () => {
+      this.startNextAdventure();
+    });
+  }
+
+  quitGame() {
+    this.score = 0;
+    this.currentLevel = 0;
+    this.usedCategories = [];
+    this.ui.showScreen("start");
+  }
 }

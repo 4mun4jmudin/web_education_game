@@ -1,85 +1,91 @@
-// js/game_modes/4_sentence_builder.js
+// File: js/game_modes/4_sentence_builder.js (Final)
 
 class SentenceBuilderMode {
-    constructor(ui) {
+    constructor(ui, speech) {
         this.ui = ui;
-        this.playerAnswer = [];
-        this.wordBank = [];
+        this.speech = speech;
+        this.engine = null;
+        this.onSubmit = null;
+        this.challengeData = null;
+        this.currentAnswer = [];
+        this.wordElements = [];
     }
 
-    start(challengeData, onSubmitCallback) {
-        this.playerAnswer = [];
-        const correctSentence = challengeData.en;
-        this.wordBank = correctSentence.split(' ').sort(() => 0.5 - Math.random());
+    start(challengeData, onSubmitCallback, dynamicInstruction) {
+        this.challengeData = challengeData;
+        this.onSubmit = onSubmitCallback;
+        this.currentAnswer = [];
+        this.wordElements = [];
+        const correctAnswer = this.challengeData.en;
+        
+        const words = correctAnswer.split(' ');
+        const shuffledWords = [...words].sort(() => 0.5 - Math.random());
 
-        const html = `
-            <div id="instruction-text" class="instruction">Susun kata-kata berikut menjadi kalimat yang benar:</div>
-            <div id="game-content">
-                <div id="answer-area" class="answer-area">
-                    <!-- Kata yang dipilih pemain akan muncul di sini -->
-                </div>
-                <div id="word-bank-area" class="word-bank-area">
-                    <!-- Pilihan kata yang diacak akan muncul di sini -->
-                </div>
-                <button id="check-sentence-btn" class="btn-primary">Periksa</button>
+        const instruction = dynamicInstruction || "Susun kata-kata ini menjadi kalimat yang benar.";
+        this.ui.drawInstruction(instruction);
+
+        const challengeHtml = `
+            <div id="answer-area" class="sentence-answer-area" data-placeholder="Kalimat akan muncul di sini..."></div>
+            <div id="word-bank" class="sentence-word-bank">
+                ${shuffledWords.map((word, index) => {
+                    const el = `<button class="btn-word-bank" data-word="${word}">${word}</button>`;
+                    this.wordElements.push({word: word, element: el, used: false});
+                    return el;
+                }).join('')}
             </div>
         `;
-        this.ui.drawChallenge(html);
-        this.drawWords();
+        this.ui.drawChallenge(challengeHtml);
 
-        const checkButton = document.getElementById('check-sentence-btn');
-        checkButton.addEventListener('click', () => {
-            const isCorrect = this.playerAnswer.join(' ') === correctSentence;
-            
-            checkButton.disabled = true;
-            document.getElementById('word-bank-area').innerHTML = ''; // Sembunyikan pilihan kata
-
-            const answerArea = document.getElementById('answer-area');
-            answerArea.classList.add(isCorrect ? 'correct' : 'incorrect');
-
-            onSubmitCallback(isCorrect);
-        });
+        const userInputHtml = `
+            <button id="reset-sentence-btn" class="btn-secondary">Ulangi</button>
+            <button id="submit-sentence-btn" class="btn-primary">Periksa</button>
+        `;
+        this.ui.drawUserInput(userInputHtml);
+        
+        this.addEventListeners();
+        this.updateAnswerArea();
     }
 
-    drawWords() {
+    addEventListeners() {
+        document.querySelectorAll('.btn-word-bank').forEach(button => {
+            button.addEventListener('click', (e) => this.moveWordToAnswer(e));
+        });
+        document.getElementById('submit-sentence-btn').addEventListener('click', () => this.checkSentence());
+        document.getElementById('reset-sentence-btn').addEventListener('click', () => this.resetSentence());
+    }
+
+    moveWordToAnswer(event) {
+        const button = event.target;
+        this.currentAnswer.push(button.dataset.word);
+        button.style.visibility = 'hidden';
+        this.updateAnswerArea();
+    }
+
+    resetSentence() {
+        this.currentAnswer = [];
+        document.querySelectorAll('.btn-word-bank').forEach(button => {
+            button.style.visibility = 'visible';
+        });
+        this.updateAnswerArea();
+    }
+
+    updateAnswerArea() {
         const answerArea = document.getElementById('answer-area');
-        const wordBankArea = document.getElementById('word-bank-area');
-
-        answerArea.innerHTML = '';
-        wordBankArea.innerHTML = '';
-
-        // Tampilkan kata di area jawaban pemain
-        this.playerAnswer.forEach((word, index) => {
-            const wordEl = document.createElement('button');
-            wordEl.className = 'word-tag answer';
-            wordEl.textContent = word;
-            wordEl.onclick = () => this.returnWord(word, index);
-            answerArea.appendChild(wordEl);
-        });
-         // Tambahkan placeholder jika area jawaban kosong
-        if (this.playerAnswer.length === 0) {
-            answerArea.innerHTML = `<span class="placeholder-text">Susun kata di sini</span>`;
+        if (this.currentAnswer.length === 0) {
+            answerArea.textContent = answerArea.dataset.placeholder;
+            answerArea.classList.add('placeholder');
+        } else {
+            answerArea.textContent = this.currentAnswer.join(' ');
+            answerArea.classList.remove('placeholder');
         }
-
-        // Tampilkan kata di bank kata
-        this.wordBank.forEach((word, index) => {
-            const wordEl = document.createElement('button');
-            wordEl.className = 'word-tag choice';
-            wordEl.textContent = word;
-            wordEl.onclick = () => this.selectWord(word, index);
-            wordBankArea.appendChild(wordEl);
-        });
     }
 
-    selectWord(word, index) {
-        this.playerAnswer.push(word);
-        this.wordBank.splice(index, 1);
-        this.drawWords();
-    }
-
-    returnWord(word, index) {
-        this.wordBank.push(word);
-        this.playerAnswer.splice(index, 1);
-        this.drawWords();
+    checkSentence() {
+        const userAnswer = this.currentAnswer.join(' ');
+        const correctAnswer = this.challengeData.en;
+        const isCorrect = userAnswer === correctAnswer;
+        
+        document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        this.onSubmit(isCorrect);
     }
 }

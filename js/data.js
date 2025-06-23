@@ -1,79 +1,75 @@
-// js/data.js
+// File: js/data.js
 
-// Konstanta ini menyimpan semua konten pembelajaran untuk game.
 const GAME_DATA = {
-    // Kategori Kosakata
+    // Kategori ini bisa Anda tambah terus menerus
     categories: {
         animals: {
             displayName: "Hewan",
             words: [
-                { en: "Cat", id: "kucing", img: "assets/images/animals/cat.svg" },
-                { en: "Dog", id: "anjing", img: "assets/images/animals/dog.svg" },
-                { en: "Bird", id: "burung", img: "assets/images/animals/bird.svg" },
-                { en: "Fish", id: "ikan", img: "assets/images/animals/fish.svg" },
-                { en: "Duck", id: "bebek", img: "assets/images/animals/duck.svg" },
+                { en: "Cat", id: "kucing" }, { en: "Dog", id: "anjing" },
+                { en: "Bird", id: "burung" }, { en: "Fish", id: "ikan" },
+                { en: "Duck", id: "bebek" }, { en: "Horse", id: "kuda" },
+                { en: "Cow", id: "sapi" }, { en: "Sheep", id: "domba" },
+                { en: "Elephant", id: "gajah" }, { en: "Lion", id: "singa" },
+                { en: "Tiger", id: "harimau" }, { en: "Monkey", id: "monyet" },
             ]
         },
         fruits: {
             displayName: "Buah-buahan",
             words: [
-                { en: "Apple", id: "apel", img: "assets/images/fruits/apple.svg" },
-                { en: "Banana", id: "pisang", img: "assets/images/fruits/banana.svg" },
-                { en: "Orange", id: "jeruk", img: "assets/images/fruits/orange.svg" },
-                { en: "Grape", id: "anggur", img: "assets/images/fruits/grape.svg" },
-                { en: "Strawberry", id: "stroberi", img: "assets/images/fruits/strawberry.svg" },
+                { en: "Apple", id: "apel" }, { en: "Banana", id: "pisang" },
+                { en: "Orange", id: "jeruk" }, { en: "Grape", id: "anggur" },
+                { en: "Strawberry", id: "stroberi" }, { en: "Watermelon", id: "semangka" },
+                { en: "Pineapple", id: "nanas" }, { en: "Mango", id: "mangga" },
+            ]
+        },
+        objects: {
+            displayName: "Benda di Rumah",
+            words: [
+                { en: "Table", id: "meja" }, { en: "Chair", id: "kursi" },
+                { en: "Book", id: "buku" }, { en: "Door", id: "pintu" },
+                { en: "Window", id: "jendela" }, { en: "Bed", id: "kasur" },
+                { en: "Lamp", id: "lampu" }, { en: "Clock", id: "jam" },
+            ]
+        },
+        transportation: {
+            displayName: "Transportasi",
+            words: [
+                { en: "Car", id: "mobil" }, { en: "Bus", id: "bis" },
+                { en: "Train", id: "kereta" }, { en: "Bicycle", id: "sepeda" },
+                { en: "Motorcycle", id: "motor" }, { en: "Airplane", id: "pesawat" },
+                { en: "Ship", id: "kapal" }, { en: "Boat", id: "perahu" },
+            ]
+        },
+        verbs: {
+            displayName: "Kata Kerja",
+            words: [
+                { en: "Eat", id: "makan" }, { en: "Drink", id: "minum" },
+                { en: "Run", id: "lari" }, { en: "Walk", id: "jalan" },
+                { en: "Read", id: "membaca" }, { en: "Write", id: "menulis" },
+                { en: "Sleep", id: "tidur" }, { en: "Play", id: "bermain" },
             ]
         },
         numbers: {
             displayName: "Angka",
             words: [
-                { en: "One", id: "satu", display: "1" },
-                { en: "Two", id: "dua", display: "2" },
-                { en: "Three", id: "tiga", display: "3" },
-                { en: "Four", id: "empat", display: "4" },
-                { en: "Five", id: "lima", display: "5" },
+                { en: "One", id: "1" }, { en: "Two", id: "2" },
+                { en: "Three", id: "3" }, { en: "Four", id: "4" },
+                { en: "Five", id: "5" }, { en: "Six", id: "6" },
+                { en: "Seven", id: "7" }, { en: "Eight", id: "8" },
+                { en: "Nine", id: "9" }, { en: "Ten", id: "10" },
             ]
         },
         simpleSentences: {
-            displayName: "Kalimat Sederhana",
-            words: [ // Di sini 'words' sebenarnya adalah 'sentences'
-                { en: "I see a cat", id: "kalimat1" },
-                { en: "He has a dog", id: "kalimat2" },
-                { en: "It is an apple", id: "kalimat3" },
-                { en: "She likes banana", id: "kalimat4" },
-                { en: "We eat fish", id: "kalimat5" },
+            displayName: "Menyusun Kalimat",
+            words: [
+                { en: "I see a red car" },
+                { en: "She is reading a book" },
+                { en: "He eats a yellow banana" },
+                { en: "They walk to school" },
+                { en: "The cat sleeps on the chair" },
+                { en: "We play with a ball" },
             ]
         }
-    },
-
-    // Struktur Level untuk Mode Petualangan
-    adventureLevels: [
-        // Level 1-5: Mencocokkan kosakata
-        { level: 1, gameMode: "VocabularyMatch", category: "animals", challenges: 5 },
-        { level: 2, gameMode: "VocabularyMatch", category: "fruits", challenges: 5 },
-        { level: 3, gameMode: "VocabularyMatch", category: "numbers", challenges: 5 },
-        { level: 4, gameMode: "VocabularyMatch", category: "animals", challenges: 7 },
-        { level: 5, gameMode: "VocabularyMatch", category: "fruits", challenges: 7 },
-        
-        // Level 6-10: Memperkenalkan "Dengarkan dan Tulis"
-        { level: 6, gameMode: "ListenAndType", category: "animals", challenges: 5 },
-        { level: 7, gameMode: "ListenAndType", category: "fruits", challenges: 5 },
-        { level: 8, gameMode: "VocabularyMatch", category: "numbers", challenges: 10 },
-        { level: 9, gameMode: "ListenAndType", category: "animals", challenges: 7 },
-        { level: 10, gameMode: "ListenAndType", category: "fruits", challenges: 7 },
-
-        // Level 11-15: Memperkenalkan "Ucapkan Kata"
-        { level: 11, gameMode: "SpeakTheWord", category: "animals", challenges: 5 },
-        { level: 12, gameMode: "SpeakTheWord", category: "fruits", challenges: 5 },
-        { level: 13, gameMode: "ListenAndType", category: "numbers", challenges: 5},
-        { level: 14, gameMode: "SpeakTheWord", category: "animals", challenges: 7 },
-        { level: 15, gameMode: "VocabularyMatch", category: "fruits", challenges: 10},
-
-        // Level 16-20: Memperkenalkan "Susun Kalimat" dan Campuran
-        { level: 16, gameMode: "SentenceBuilder", category: "simpleSentences", challenges: 3 },
-        { level: 17, gameMode: "VocabularyMatch", category: "animals", challenges: 10 },
-        { level: 18, gameMode: "SpeakTheWord", category: "fruits", challenges: 7 },
-        { level: 19, gameMode: "ListenAndType", category: "animals", challenges: 7 },
-        { level: 20, gameMode: "SentenceBuilder", category: "simpleSentences", challenges: 5 },
-    ]
+    }
 };
