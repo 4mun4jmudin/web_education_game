@@ -1,7 +1,8 @@
 // File: js/speech_handler.js (Final)
 
 class SpeechHandler {
-  constructor() {
+  constructor(settingsManager) {
+    this.settings = settingsManager;
     this.synth = window.speechSynthesis;
     this.recognition = null;
 
@@ -9,8 +10,8 @@ class SpeechHandler {
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
-      this.recognition.continuous = false; // Hanya menangkap satu ucapan
-      this.recognition.lang = "en-US"; // Bahasa yang dikenali
+      this.recognition.continuous = false;
+      this.recognition.lang = "en-US";
       this.recognition.interimResults = false;
       this.recognition.maxAlternatives = 1;
     } else {
@@ -23,6 +24,8 @@ class SpeechHandler {
    * @param {string} text - Teks yang akan diucapkan.
    */
   speak(text) {
+    if (this.settings.settings.ttsMuted) return; // Cek pengaturan
+
     if (this.synth.speaking) {
       this.synth.cancel();
     }

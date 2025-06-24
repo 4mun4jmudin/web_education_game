@@ -4,23 +4,35 @@ class VocabularyMatchMode {
   constructor(ui, speech) {
     this.ui = ui;
     this.speech = speech;
-    this.engine = null; // Di-set oleh GameEngine saat registrasi
+    this.engine = null;
     this.onSubmit = null;
     this.challengeData = null;
   }
 
-  start(challengeData, onSubmitCallback, dynamicInstruction, categoryWordList) {
+  start(
+    challengeData,
+    onSubmitCallback,
+    dynamicInstruction,
+    categoryWordList,
+    difficulty
+  ) {
     this.challengeData = challengeData;
     this.onSubmit = onSubmitCallback;
     const correctAnswer = this.challengeData.en;
     const imageId = this.challengeData.id;
 
-    // Ambil 3 pilihan salah dari `categoryWordList` yang sudah disediakan oleh GameEngine.
-    // Ini memastikan pilihan salah PASTI berasal dari kategori yang benar.
+    // Sesuaikan jumlah pilihan salah berdasarkan tingkat kesulitan
+    let wrongOptionCount = 3; // Mudah
+    if (difficulty === "medium") {
+      wrongOptionCount = 2; // 3 pilihan total
+    } else if (difficulty === "hard") {
+      wrongOptionCount = 1; // 2 pilihan total (50/50)
+    }
+
     const wrongOptions = categoryWordList
       .filter((w) => w.en !== correctAnswer)
       .sort(() => 0.5 - Math.random())
-      .slice(0, 3)
+      .slice(0, wrongOptionCount)
       .map((w) => w.en);
 
     const options = [...wrongOptions, correctAnswer].sort(
@@ -35,7 +47,9 @@ class VocabularyMatchMode {
             <div class="image-challenge-container">
                 <img src="assets/images/words/${imageId}.png" alt="${correctAnswer}" class="challenge-image">
             </div>
-            <div class="options-grid">
+            <div class="options-grid" style="grid-template-columns: repeat(${
+              options.length > 2 ? 2 : options.length
+            }, 1fr);">
                 ${options
                   .map((opt) => `<button class="btn-option">${opt}</button>`)
                   .join("")}

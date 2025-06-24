@@ -2,8 +2,6 @@
 
 class AIHandler {
   constructor(apiKey) {
-    // Periksa apakah class GoogleGenerativeAI ada SEBELUM digunakan.
-    // Ini adalah pertahanan utama melawan error jika SDK gagal dimuat.
     if (typeof GoogleGenerativeAI === "undefined") {
       console.warn(
         "SDK Google AI tidak berhasil dimuat. Fitur AI akan dinonaktifkan."
@@ -11,7 +9,6 @@ class AIHandler {
       this.generativeAi = null;
       return;
     }
-
     if (!apiKey) {
       console.warn(
         "API Key untuk AI tidak ditemukan. Fitur AI akan dinonaktifkan."
@@ -19,8 +16,6 @@ class AIHandler {
       this.generativeAi = null;
       return;
     }
-
-    // Menggunakan try-catch sebagai lapisan keamanan tambahan
     try {
       this.generativeAi = new GoogleGenerativeAI(apiKey);
     } catch (e) {
@@ -32,18 +27,10 @@ class AIHandler {
     }
   }
 
-  /**
-   * Mengirim prompt ke model Gemini dan mengembalikan respons teks.
-   * @param {string} prompt - Pertanyaan atau instruksi untuk AI.
-   * @returns {Promise<string>} - Jawaban dari AI atau string kosong jika gagal.
-   */
   async generateText(prompt) {
-    // Jika AI tidak berhasil diinisialisasi, langsung kembalikan string kosong.
-    // Ini mencegah error dan membuat game tetap berjalan.
     if (!this.generativeAi) {
       return "";
     }
-
     try {
       const model = this.generativeAi.getGenerativeModel({
         model: "gemini-pro",
@@ -53,21 +40,13 @@ class AIHandler {
       return response.text();
     } catch (error) {
       console.error("Error saat memanggil AI:", error);
-      return ""; // Kembalikan string kosong jika terjadi error
+      return "";
     }
   }
 
-  /**
-   * Membuat instruksi permainan yang lebih menarik secara dinamis.
-   * @param {string} mode - Mode permainan saat ini (misal: 'VocabularyMatch').
-   * @param {string} category - Kategori kata (misal: 'Hewan').
-   * @param {object} challengeData - Data tantangan (misal: { en: 'Cat', id: 'kucing' }).
-   * @returns {Promise<string>} - Instruksi yang dihasilkan AI.
-   */
   async createDynamicInstruction(mode, category, challengeData) {
     let prompt;
     const word = challengeData.en;
-
     switch (mode) {
       case "VocabularyMatch":
         prompt = `Buat satu kalimat instruksi yang sangat singkat dan ceria untuk anak-anak, meminta mereka menemukan gambar "${word}" di antara pilihan lain. Kategori: ${category}.`;
@@ -81,10 +60,41 @@ class AIHandler {
       default:
         return "";
     }
-
     const instruction = await this.generateText(prompt);
-    // Jika AI gagal atau mengembalikan string kosong, berikan string kosong lagi
-    // agar game mode bisa menggunakan instruksi default mereka.
     return instruction || "";
+  }
+
+  async getCorrectiveFeedback(mode, correctAnswer, userAnswer) {
+    if (!this.generativeAi || !userAnswer) {
+      return "";
+    }
+    const modeDescription = {
+      ListenAndType: "mengetik kata yang didengar",
+      SentenceBuilder: "menyusun kalimat",
+    };
+
+    if (!(mode in modeDescription)) {
+      return ""; // Mode tidak didukung
+    }
+
+    const prompt = `
+      Anda adalah asisten game edukasi untuk anak-anak.
+      Seorang anak sedang bermain game ${modeDescription[mode]}.
+      Jawaban yang benar adalah: "${correctAnswer}"
+      Jawaban anak itu: "${userAnswer}"
+      
+      Tugas Anda: Berikan satu kalimat umpan balik yang sangat singkat, positif, dan membantu dalam Bahasa Indonesia. Fokus pada kesalahan spesifik anak itu (salah ketik atau urutan kata) tanpa membuat mereka berkecil hati. Jangan gunakan tanda kutip dalam jawaban Anda.
+      
+      Contoh (salah ketik): Hampir benar! Ingat ya, 'Apple' itu pakai dua huruf 'p'.
+      Contoh (urutan kata): Sudah bagus! Coba tukar posisi kata 'car' dan 'red'.
+    `;
+
+    try {
+      const feedback = await this.generateText(prompt);
+      return feedback.replace(/["*]/g, "").trim();
+    } catch (error) {
+      console.error("Error mendapatkan umpan balik korektif:", error);
+      return "";
+    }
   }
 }
