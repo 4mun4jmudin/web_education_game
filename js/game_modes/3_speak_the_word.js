@@ -1,5 +1,3 @@
-// File: js/game_modes/3_speak_the_word.js (Final)
-
 class SpeakTheWordMode {
     constructor(ui, speech) {
         this.ui = ui;

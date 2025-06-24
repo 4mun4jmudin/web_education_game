@@ -1,5 +1,3 @@
-// File: js/game_modes/1_vocabulary_match.js (Final)
-
 class VocabularyMatchMode {
   constructor(ui, speech) {
     this.ui = ui;
@@ -21,7 +19,6 @@ class VocabularyMatchMode {
     const correctAnswer = this.challengeData.en;
     const imageId = this.challengeData.id;
 
-    // Sesuaikan jumlah pilihan salah berdasarkan tingkat kesulitan
     let wrongOptionCount = 3; // Mudah
     if (difficulty === "medium") {
       wrongOptionCount = 2; // 3 pilihan total

@@ -1,5 +1,3 @@
-// File: js/game_modes/2_listen_and_type.js (Final)
-
 class ListenAndTypeMode {
   constructor(ui, speech) {
     this.ui = ui;

@@ -1,7 +1,7 @@
 // File: js/main.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  const GEMINI_API_KEY = "AIzaSyCxtPxGJg1tsHcd-M61M3wRVibrLtzE2dU";
+  const GEMINI_API_KEY = "AIzaSyDeiTFdZfIp3ekaJEAFLsfXRaU5M5_zyDs";
 
   const storage = new StorageManager();
   const settings = new SettingsManager();
@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     achievements
   );
 
+  // ... (registrasi mode game tidak berubah)
   engine.registerGameMode(
     "VocabularyMatch",
     new VocabularyMatchMode(ui, speech)
@@ -28,25 +29,30 @@ document.addEventListener("DOMContentLoaded", () => {
     "SentenceBuilder",
     new SentenceBuilderMode(ui, speech)
   );
+  engine.registerGameMode("AIStoryTime", new AIStoryTimeMode(ui, speech, ai));
 
   let selectedCategoryKey = null;
 
+  // ... (deklarasi elemen DOM tidak berubah)
   const categoryContainer = document.getElementById(
     "category-selection-container"
   );
-  const backToTopicsBtn = document.getElementById("back-to-topics-btn");
   const quitGameBtn = document.getElementById("quit-game-btn");
   const settingsBtn = document.getElementById("settings-btn");
   const achievementsBtn = document.getElementById("achievements-btn");
-  const backToStartBtn = document.getElementById("back-to-start-btn");
-  const closeSettingsBtn = document.getElementById("close-settings-btn");
+  const modalOverlay = document.getElementById("modal-overlay");
+  const allModals = document.querySelectorAll(".modal");
+  const modeSelectionModal = document.getElementById("mode-selection-modal");
+  const settingsModal = document.getElementById("settings-modal");
+  const achievementsModal = document.getElementById("achievements-modal");
+  const difficultyButtons = document.querySelectorAll(".btn-difficulty");
   const musicToggle = document.getElementById("music-toggle");
   const sfxToggle = document.getElementById("sfx-toggle");
   const ttsToggle = document.getElementById("tts-toggle");
   const darkModeToggle = document.getElementById("dark-mode-toggle");
   const backgroundMusic = document.getElementById("background-music");
-  const difficultyButtons = document.querySelectorAll(".btn-difficulty");
 
+  // ... (fungsi setupCategorySelection tidak berubah)
   function setupCategorySelection() {
     if (!categoryContainer) return;
     categoryContainer.innerHTML = "";
@@ -56,62 +62,97 @@ document.addEventListener("DOMContentLoaded", () => {
       const category = categories[categoryKey];
       const progress = allProgress[categoryKey] || { score: 0, stars: 0 };
       const button = document.createElement("button");
-      button.className = "btn-category";
+      button.className = "btn btn-category";
       if (progress.score > 0) button.classList.add("completed");
+
       button.addEventListener("click", () => {
         selectedCategoryKey = categoryKey;
-        showModeSelectionScreen(categoryKey);
+        showModeSelectionModal(categoryKey);
       });
+
       let starsHtml = '<div class="category-stars">';
       for (let i = 1; i <= 3; i++) {
-        starsHtml += `<img src="assets/images/ui/star-svgrepo-com.svg" class="star ${
+        const starIcon = `<svg class="star ${
           i <= progress.stars ? "active" : ""
-        }" alt="Bintang">`;
+        }" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        starsHtml += starIcon;
       }
       starsHtml += "</div>";
+
       let buttonContent = `<span class="category-name">${category.displayName}</span>${starsHtml}`;
       button.innerHTML = buttonContent;
       categoryContainer.appendChild(button);
     }
   }
 
-  // --- FUNGSI INI DIPERBARUI ---
-  function showModeSelectionScreen(categoryKey) {
+  function openModal(modalElement) {
+    modalOverlay.classList.add("active");
+    modalElement.classList.add("active");
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove("active");
+    allModals.forEach((modal) => {
+      modal.classList.remove("active");
+    });
+  }
+
+  // --- FUNGSI INI DIPERBARUI TOTAL ---
+  function showModeSelectionModal(categoryKey) {
     const availableModes = engine.getAvailableModesForCategory(categoryKey);
     const modeContainer = document.getElementById("mode-selection-container");
     const topicTitle = document.getElementById("mode-selection-topic");
+    const mistakes = storage.getMistakesForCategory(categoryKey);
+
     modeContainer.innerHTML = "";
     topicTitle.textContent = `Topik: ${GAME_DATA.categories[categoryKey].displayName}`;
 
-    // Buat tombol untuk setiap mode yang tersedia
+    // Tombol Mode Ulasan (hanya muncul jika ada kesalahan)
+    if (mistakes.length > 0) {
+      const reviewButton = document.createElement("button");
+      reviewButton.className = "btn btn-mode review-mode";
+      reviewButton.innerHTML = `🧠 Latih Kesalahan Saya <span class="mistake-count">${mistakes.length}</span>`;
+      reviewButton.addEventListener("click", () => {
+        closeModal();
+        engine.startGame(selectedCategoryKey, "REVIEW");
+      });
+      modeContainer.appendChild(reviewButton);
+    }
+
+    // Tombol mode normal
     for (const modeId in availableModes) {
       const button = document.createElement("button");
-      button.className = "btn-mode";
+      button.className = "btn btn-mode";
       button.textContent = availableModes[modeId];
       button.addEventListener("click", () => {
+        closeModal();
         engine.startGame(selectedCategoryKey, modeId);
       });
       modeContainer.appendChild(button);
     }
 
-    // -- DIPERBARUI: Tombol untuk "Mode Campuran" --
+    // Tombol mode campuran
     if (Object.keys(availableModes).length > 1) {
       const randomButton = document.createElement("button");
-      randomButton.className = "btn-mode btn-secondary";
-      randomButton.textContent = "Mode Campuran (Acak)"; // <-- Teks diubah
-      randomButton.style.marginTop = "10px";
+      randomButton.className = "btn btn-mode btn-secondary";
+      randomButton.textContent = "Mode Campuran (Acak)";
       randomButton.addEventListener("click", () => {
-        // Panggil engine dengan flag 'MIXED' untuk mode campuran
-        engine.startGame(selectedCategoryKey, "MIXED"); // <-- Flag diubah
+        closeModal();
+        engine.startGame(selectedCategoryKey, "MIXED");
       });
       modeContainer.appendChild(randomButton);
     }
-    // -- AKHIR PEMBARUAN --
 
-    ui.showScreen("modeSelection");
+    openModal(modeSelectionModal);
   }
 
-  function showAchievementsScreen() {
+  // ... (sisa file main.js tidak berubah)
+  function showSettingsModal() {
+    updateSettingsTogglesUI();
+    openModal(settingsModal);
+  }
+
+  function showAchievementsModal() {
     const container = document.getElementById("achievements-list-container");
     container.innerHTML = "";
     const allAchievements = achievements.achievements;
@@ -130,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       container.appendChild(item);
     }
-    ui.showScreen("achievements");
+    openModal(achievementsModal);
   }
 
   function updateSettingsTogglesUI() {
@@ -166,15 +207,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.toggle("dark-mode", settings.settings.darkMode);
   }
 
-  backToTopicsBtn.addEventListener("click", () => ui.showScreen("start"));
   quitGameBtn.addEventListener("click", () => engine.quitGame());
-  settingsBtn.addEventListener("click", () => {
-    updateSettingsTogglesUI();
-    ui.showScreen("settings");
+  settingsBtn.addEventListener("click", showSettingsModal);
+  achievementsBtn.addEventListener("click", showAchievementsModal);
+
+  modalOverlay.addEventListener("click", closeModal);
+
+  document.querySelectorAll(".modal .btn-secondary").forEach((button) => {
+    button.addEventListener("click", closeModal);
   });
-  achievementsBtn.addEventListener("click", showAchievementsScreen);
-  backToStartBtn.addEventListener("click", () => ui.showScreen("start"));
-  closeSettingsBtn.addEventListener("click", () => ui.showScreen("start"));
+
   musicToggle.addEventListener("change", () =>
     settings.updateSetting("musicMuted", !musicToggle.checked)
   );
@@ -187,6 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
   darkModeToggle.addEventListener("change", () =>
     settings.updateSetting("darkMode", darkModeToggle.checked)
   );
+
   difficultyButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       settings.updateSetting("difficulty", btn.dataset.difficulty);
@@ -210,12 +253,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("requestCategoryUpdate", setupCategorySelection);
 
   function initializeGame() {
+    setTimeout(() => {
+      ui.showScreen("start");
+    }, 500);
+
     setupCategorySelection();
     updateSettingsTogglesUI();
     updateDifficultyUI();
     handleMusicPlayback();
     handleDarkMode();
-    ui.showScreen("start");
   }
 
   initializeGame();

@@ -1,4 +1,4 @@
-// File: js/ai_handler.js (Final & Robust)
+// File: js/ai_handler.js
 
 class AIHandler {
   constructor(apiKey) {
@@ -74,7 +74,7 @@ class AIHandler {
     };
 
     if (!(mode in modeDescription)) {
-      return ""; // Mode tidak didukung
+      return "";
     }
 
     const prompt = `
@@ -95,6 +95,47 @@ class AIHandler {
     } catch (error) {
       console.error("Error mendapatkan umpan balik korektif:", error);
       return "";
+    }
+  }
+
+  async generateStoryChallenge(categoryName, wordList) {
+    if (!this.generativeAi) return null;
+
+    const exampleWords = wordList
+      .slice(0, 5)
+      .map((w) => w.en)
+      .join(", ");
+
+    const prompt = `
+      You are a creative storyteller for a children's educational game.
+      Your task is to create a very short story (2-3 simple sentences) for kids learning English, based on a given topic. You should try to include some words from the example word list. After the story, create one simple multiple-choice comprehension question about the story.
+
+      The output MUST be a valid JSON object with the following structure, and nothing else. Do not add any conversational text before or after the JSON object.
+      {
+        "story": "A short story in English.",
+        "question": "A simple comprehension question in English about the story.",
+        "options": ["An array", "of four", "possible answers", "in English"],
+        "correctAnswer": "The correct answer string, which must be exactly one of the options."
+      }
+
+      Topic: ${categoryName}
+      Example words from this topic: ${exampleWords}
+
+      Ensure the story is simple, cheerful, and easy to understand for a 5-8 year old. The question should directly relate to a detail in the story.
+    `;
+
+    let textResponse = "";
+    try {
+      textResponse = await this.generateText(prompt);
+      // Membersihkan response dari markdown code block jika ada
+      textResponse = textResponse.replace(/```json\n|```/g, "").trim();
+      return JSON.parse(textResponse);
+    } catch (error) {
+      // Log yang lebih detail untuk membantu debugging
+      console.error("Gagal membuat atau mem-parsing cerita dari AI.");
+      console.error("Respons mentah dari AI (sebelum parsing):", textResponse);
+      console.error("Detail error:", error);
+      return null;
     }
   }
 }

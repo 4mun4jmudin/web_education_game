@@ -39,4 +39,44 @@ class StorageManager {
     }
     return allProgress;
   }
+  getMistakesKey(category) {
+    return `${this.prefix}mistakes-${category}`;
+  }
+
+  getMistakesForCategory(category) {
+    const key = this.getMistakesKey(category);
+    const savedMistakes = localStorage.getItem(key);
+    return savedMistakes ? JSON.parse(savedMistakes) : [];
+  }
+
+  addMistake(category, wordData) {
+    const key = this.getMistakesKey(category);
+    let mistakes = this.getMistakesForCategory(category);
+
+    // Cek agar tidak ada kata duplikat dalam daftar kesalahan
+    const isAlreadyAdded = mistakes.some((m) => m.en === wordData.en);
+    if (!isAlreadyAdded) {
+      mistakes.push(wordData);
+      localStorage.setItem(key, JSON.stringify(mistakes));
+      console.log(
+        `Kesalahan baru ditambahkan untuk [${category}]: ${wordData.en}`
+      );
+    }
+  }
+
+  removeMistake(category, wordData) {
+    const key = this.getMistakesKey(category);
+    let mistakes = this.getMistakesForCategory(category);
+    const initialCount = mistakes.length;
+
+    const updatedMistakes = mistakes.filter((m) => m.en !== wordData.en);
+
+    if (updatedMistakes.length < initialCount) {
+      console.log(
+        `Kata [${wordData.en}] dihapus dari daftar kesalahan [${category}].`
+      );
+    }
+
+    localStorage.setItem(key, JSON.stringify(updatedMistakes));
+  }
 }

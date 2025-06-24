@@ -5,26 +5,34 @@ class UIManager {
     this.screens = {
       loading: document.getElementById("loading-screen"),
       start: document.getElementById("start-screen"),
-      modeSelection: document.getElementById("mode-selection-screen"),
       game: document.getElementById("game-screen"),
       levelComplete: document.getElementById("level-complete-screen"),
-      settings: document.getElementById("settings-screen"),
-      achievements: document.getElementById("achievements-screen"),
     };
 
     this.levelIndicator = document.getElementById("level-indicator");
     this.scoreIndicator = document.getElementById("score-indicator");
     this.progressBar = document.getElementById("progress-bar");
-
     this.instructionText = document.getElementById("instruction-text");
     this.gameContent = document.getElementById("game-content");
     this.userInputArea = document.getElementById("user-input-area");
     this.notificationArea = document.getElementById("notification-area");
 
-    this.sfxCorrect = document.getElementById("sfx-correct");
-    this.sfxWrong = document.getElementById("sfx-wrong");
-
     this.activeScreen = this.screens.loading;
+
+    // --- PERBAIKAN DIMULAI DI SINI ---
+    this.onNextLevelCallback = null; // Properti untuk menyimpan fungsi callback
+    this.nextLevelBtn = document.getElementById("next-level-btn");
+
+    // Pasang event listener hanya sekali saat UIManager dibuat
+    if (this.nextLevelBtn) {
+      this.nextLevelBtn.addEventListener("click", () => {
+        // Saat diklik, panggil fungsi callback yang tersimpan
+        if (this.onNextLevelCallback) {
+          this.onNextLevelCallback();
+        }
+      });
+    }
+    // --- AKHIR PERBAIKAN ---
   }
 
   showScreen(screenId) {
@@ -36,31 +44,43 @@ class UIManager {
       newScreen.classList.add("active");
       this.activeScreen = newScreen;
     } else {
-      console.error(`Layar dengan ID "${screenId}" tidak ditemukan.`);
+      console.error(
+        `Error: Layar dengan ID "${screenId}" tidak dikelola oleh UIManager.`
+      );
     }
   }
 
   updateLevelIndicator(text) {
-    this.levelIndicator.textContent = text;
-  }
-  updateScoreIndicator(score) {
-    this.scoreIndicator.textContent = `Skor: ${score}`;
-  }
-  updateProgressBar(current, max) {
-    this.progressBar.style.width = `${(current / max) * 100}%`;
-  }
-  drawInstruction(text) {
-    this.instructionText.innerHTML = text;
-  }
-  drawChallenge(htmlContent) {
-    this.gameContent.innerHTML = htmlContent;
-  }
-  drawUserInput(htmlContent) {
-    this.userInputArea.innerHTML = htmlContent;
+    if (this.levelIndicator) this.levelIndicator.textContent = text;
   }
 
+  updateScoreIndicator(score) {
+    if (this.scoreIndicator) this.scoreIndicator.textContent = `Skor: ${score}`;
+  }
+
+  updateProgressBar(current, max) {
+    if (this.progressBar) {
+      const percentage = max > 0 ? (current / max) * 100 : 0;
+      this.progressBar.style.width = `${percentage}%`;
+    }
+  }
+
+  drawInstruction(text) {
+    if (this.instructionText) this.instructionText.innerHTML = text;
+  }
+
+  drawChallenge(htmlContent) {
+    if (this.gameContent) this.gameContent.innerHTML = htmlContent;
+  }
+
+  drawUserInput(htmlContent) {
+    if (this.userInputArea) this.userInputArea.innerHTML = htmlContent;
+  }
+
+  // --- PERBAIKAN PADA FUNGSI INI ---
   showLevelCompleteScreen(score, stars, onNextLevelCallback) {
-    document.getElementById("level-score").textContent = score;
+    const scoreEl = document.getElementById("level-score");
+    if (scoreEl) scoreEl.textContent = score;
 
     const starsContainer = document.getElementById("result-stars-container");
     if (starsContainer) {
@@ -74,50 +94,42 @@ class UIManager {
       }
     }
 
+    // Simpan fungsi callback yang baru ke properti class
+    this.onNextLevelCallback = onNextLevelCallback;
+
+    // Hapus logika cloneNode yang rumit dan tidak perlu
     this.showScreen("levelComplete");
-
-    const nextLevelBtn = document.getElementById("next-level-btn");
-    const newBtn = nextLevelBtn.cloneNode(true);
-    nextLevelBtn.parentNode.replaceChild(newBtn, nextLevelBtn);
-    newBtn.addEventListener("click", onNextLevelCallback, { once: true });
   }
 
-  showFeedback(isCorrect) {
+  triggerScreenShake() {
     const gameScreen = this.screens.game;
-    const feedbackClass = isCorrect ? "correct-feedback" : "wrong-feedback";
-
-    gameScreen.classList.add(feedbackClass);
-    setTimeout(() => gameScreen.classList.remove(feedbackClass), 500);
-
-    this.playFeedbackSfx(isCorrect);
-  }
-
-  playFeedbackSfx(isCorrect) {
-    const soundToPlay = isCorrect ? this.sfxCorrect : this.sfxWrong;
-    const sfxToggle = document.getElementById("sfx-toggle");
-    if (soundToPlay && sfxToggle && !sfxToggle.checked) {
-      soundToPlay.currentTime = 0;
-      soundToPlay.play().catch((e) => console.error("Gagal memutar SFX:", e));
+    if (gameScreen) {
+      gameScreen.classList.add("shake-feedback");
+      setTimeout(() => {
+        gameScreen.classList.remove("shake-feedback");
+      }, 500);
     }
   }
 
-  showNotification(message, duration = 2000) {
+  showNotification(message, duration = 2000, type = "default") {
+    if (!this.notificationArea) return;
+
     const notification = document.createElement("div");
     notification.className = "notification";
+    notification.classList.add(type);
     notification.innerHTML = message;
+
     this.notificationArea.appendChild(notification);
 
     setTimeout(() => notification.classList.add("show"), 10);
+
     setTimeout(() => {
       notification.classList.remove("show");
-      setTimeout(() => {
-        if (
-          this.notificationArea &&
-          this.notificationArea.contains(notification)
-        ) {
-          this.notificationArea.removeChild(notification);
+      notification.addEventListener("transitionend", () => {
+        if (notification.parentElement) {
+          notification.parentElement.removeChild(notification);
         }
-      }, 500);
+      });
     }, duration);
   }
 }

@@ -29,33 +29,42 @@ class GameEngine {
   }
 
   getAvailableModesForCategory(categoryName) {
+    // ... (Fungsi ini tidak berubah)
     const modeNames = {
       VocabularyMatch: "Cocokkan Gambar",
       ListenAndType: "Dengar & Ketik",
       SpeakTheWord: "Ucapkan Kata",
       SentenceBuilder: "Susun Kalimat",
+      AIStoryTime: "Cerita AI",
     };
+
     let availableModeIds;
-    if (categoryName === "simpleSentences") {
+    const storyFriendlyCategories = [
+      "animals",
+      "fruits",
+      "objects",
+      "transportation",
+    ];
+
+    if (storyFriendlyCategories.includes(categoryName)) {
+      availableModeIds = [
+        "VocabularyMatch",
+        "ListenAndType",
+        "SpeakTheWord",
+        "AIStoryTime",
+      ];
+    } else if (categoryName === "simpleSentences") {
       availableModeIds = ["SentenceBuilder", "ListenAndType"];
     } else if (
-      [
-        "animals",
-        "fruits",
-        "objects",
-        "transportation",
-        "colors",
-        "shapes2D",
-        "shapes3D",
-        "numbers",
-      ].includes(categoryName)
+      ["colors", "shapes2D", "shapes3D", "numbers", "verbs"].includes(
+        categoryName
+      )
     ) {
       availableModeIds = ["VocabularyMatch", "ListenAndType", "SpeakTheWord"];
-    } else if (categoryName === "verbs") {
-      availableModeIds = ["ListenAndType", "SpeakTheWord"];
     } else {
       availableModeIds = ["ListenAndType"];
     }
+
     const result = {};
     availableModeIds.forEach((id) => {
       if (modeNames[id]) result[id] = modeNames[id];
@@ -64,11 +73,18 @@ class GameEngine {
   }
 
   startGame(categoryName, gameModeName) {
+    // ... (Fungsi ini tidak berubah)
+    if (gameModeName === "RANDOM" || gameModeName === "MIXED") {
+      const availableModes = this.getAvailableModesForCategory(categoryName);
+      const modeIds = Object.keys(availableModes);
+      const randomId = modeIds[Math.floor(Math.random() * modeIds.length)];
+      gameModeName = gameModeName === "RANDOM" ? randomId : "MIXED";
+    }
+
     this.score = 0;
     this.correctStreak = 0;
     this.currentChallengeIndex = 0;
 
-    // Cukup simpan gameModeName, baik itu mode spesifik atau 'MIXED'
     this.levelData = {
       gameMode: gameModeName,
       category: categoryName,
@@ -86,42 +102,52 @@ class GameEngine {
 
   prepareChallenges() {
     this.challenges = [];
-    const categoryWords = [
-      ...GAME_DATA.categories[this.levelData.category].words,
-    ];
-    categoryWords.sort(() => 0.5 - Math.random());
+    const category = this.levelData.category;
+
+    // --- LOGIKA BARU UNTUK MODE ULASAN ---
+    if (this.levelData.gameMode === "REVIEW") {
+      const mistakes = this.storage.getMistakesForCategory(category);
+      // Acak urutan soal dari daftar kesalahan
+      this.challenges = [...mistakes].sort(() => 0.5 - Math.random());
+      this.levelData.challengesCount = this.challenges.length;
+      console.log(
+        `Memulai Mode Ulasan untuk [${category}] dengan ${this.challenges.length} soal.`
+      );
+      return; // Hentikan eksekusi di sini untuk Mode Ulasan
+    }
+    // --- AKHIR LOGIKA BARU ---
+
+    // Logika untuk mode normal & lainnya
+    let challengeCount;
     const difficulty = this.settings.settings.difficulty;
-    let challengeCount = 5;
-    if (difficulty === "medium") {
+
+    if (this.levelData.gameMode === "AIStoryTime") {
+      challengeCount = 3;
+    } else if (this.levelData.gameMode === "MIXED") {
       challengeCount = 7;
-    } else if (difficulty === "hard") {
-      challengeCount = 10;
+    } else {
+      challengeCount = 5;
+      if (difficulty === "medium") {
+        challengeCount = 7;
+      } else if (difficulty === "hard") {
+        challengeCount = 10;
+      }
     }
     this.levelData.challengesCount = challengeCount;
 
-    // Untuk mode campuran, kita ambil tantangan lebih banyak untuk variasi
-    if (this.levelData.gameMode === "MIXED") {
-      challengeCount = 7;
-    }
+    const categoryWords = [...GAME_DATA.categories[category].words];
+    categoryWords.sort(() => 0.5 - Math.random());
 
-    if (
-      this.levelData.gameMode === "SentenceBuilder" &&
-      difficulty === "hard"
-    ) {
-      const longSentences = categoryWords.filter(
-        (w) => w.en.split(" ").length > 4
-      );
-      this.challenges =
-        longSentences.length >= challengeCount
-          ? longSentences.slice(0, challengeCount)
-          : categoryWords.slice(0, challengeCount);
-    } else {
-      this.challenges = categoryWords.slice(0, this.levelData.challengesCount);
+    for (let i = 0; i < this.levelData.challengesCount; i++) {
+      this.challenges.push({
+        en: categoryWords[i % categoryWords.length]?.en || "challenge",
+        id: categoryWords[i % categoryWords.length]?.id || "challenge",
+      });
     }
   }
 
-  // --- FUNGSI INI DIPERBARUI SECARA SIGNIFIKAN ---
   async nextChallenge() {
+    // ... (Fungsi ini tidak berubah, namun sekarang akan menangani soal dari daftar kesalahan jika dalam mode ulasan)
     if (this.currentChallengeIndex >= this.challenges.length) {
       this.completeSession();
       return;
@@ -133,16 +159,16 @@ class GameEngine {
     const challengeData = this.challenges[this.currentChallengeIndex];
     const categoryName = this.levelData.category;
 
-    // Ambil mode default dari sesi
     let modeName = this.levelData.gameMode;
 
-    // Jika ini adalah sesi 'MIXED', pilih mode baru untuk SETIAP TANTANGAN
-    if (modeName === "MIXED") {
+    if (modeName === "MIXED" || modeName === "REVIEW") {
+      // Mode Ulasan juga akan mengacak metode
       const availableModes = this.getAvailableModesForCategory(categoryName);
-      const modeIds = Object.keys(availableModes);
-      // Pilih satu ID mode secara acak
+      const modeIds = Object.keys(availableModes).filter(
+        (id) => id !== "AIStoryTime"
+      );
       const randomId = modeIds[Math.floor(Math.random() * modeIds.length)];
-      modeName = randomId; // Timpa modeName hanya untuk tantangan ini
+      modeName = randomId;
     }
 
     const mode = this.gameModes[modeName];
@@ -155,7 +181,6 @@ class GameEngine {
       const categoryWordList = GAME_DATA.categories[categoryName].words;
       const difficulty = this.settings.settings.difficulty;
 
-      // Teruskan modeName yang benar-benar digunakan ke submitAnswer
       mode.start(
         challengeData,
         (isCorrect, userAnswer) =>
@@ -169,41 +194,71 @@ class GameEngine {
     }
   }
 
-  // --- FUNGSI INI JUGA DIPERBARUI ---
   async submitAnswer(isCorrect, userAnswer = "", modePlayed = null) {
-    this.ui.showFeedback(isCorrect);
+    const currentChallenge = this.challenges[this.currentChallengeIndex];
+    const category = this.levelData.category;
+    const sessionMode = this.levelData.gameMode;
+
     if (isCorrect) {
+      this.ui.showNotification("Jawaban Benar! 🎉", 1200, "correct");
+
       this.score += 10;
       this.correctStreak++;
       if (this.correctStreak >= 3) {
         const bonusPoints = 5;
         this.score += bonusPoints;
         this.ui.showNotification(
-          `Rentetan ${this.correctStreak}! +${bonusPoints} Poin!`
+          `Rentetan ${this.correctStreak}! +${bonusPoints} Poin!`,
+          2000,
+          "default"
         );
       }
       this.ui.updateScoreIndicator(this.score);
+
+      // --- LOGIKA BARU: Hapus dari daftar kesalahan jika benar di Mode Ulasan ---
+      if (sessionMode === "REVIEW") {
+        this.storage.removeMistake(category, currentChallenge);
+      }
     } else {
       this.correctStreak = 0;
-      const correctAnswer = this.challenges[this.currentChallengeIndex].en;
+      this.ui.triggerScreenShake();
 
-      // Gunakan mode yang benar-benar dimainkan untuk umpan balik AI
-      const modeForFeedback = modePlayed || this.levelData.gameMode;
-      const correctiveFeedback = await this.ai.getCorrectiveFeedback(
-        modeForFeedback,
-        correctAnswer,
-        userAnswer
-      );
+      // --- LOGIKA BARU: Tambahkan ke daftar kesalahan jika salah di mode normal ---
+      if (sessionMode !== "REVIEW") {
+        this.storage.addMistake(category, currentChallenge);
+      }
 
-      if (correctiveFeedback) {
-        this.ui.drawInstruction(correctiveFeedback);
+      const correctAnswer = currentChallenge.en;
+      const modeForFeedback = modePlayed || sessionMode;
+
+      if (modeForFeedback === "SentenceBuilder") {
+        this.ui.drawInstruction(
+          `Kalimat yang benar adalah: <br><strong>"${correctAnswer}"</strong>`
+        );
+      } else {
+        const correctiveFeedback = await this.ai.getCorrectiveFeedback(
+          modeForFeedback,
+          correctAnswer,
+          userAnswer
+        );
+        if (correctiveFeedback) {
+          this.ui.drawInstruction(correctiveFeedback);
+        } else {
+          this.ui.showNotification(
+            "Jawaban Salah, Coba Lagi! ❌",
+            2000,
+            "wrong"
+          );
+        }
       }
     }
+
     this.currentChallengeIndex++;
     const timeoutDuration = isCorrect ? 1200 : 3000;
     setTimeout(() => this.nextChallenge(), timeoutDuration);
   }
 
+  // ... (calculateStars, completeSession, quitGame tidak berubah)
   calculateStars(score, totalChallenges) {
     const maxScore = totalChallenges * 10;
     const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
@@ -220,7 +275,6 @@ class GameEngine {
       this.storage.saveProgress(this.levelData.category, this.score, stars);
       const sessionData = {
         category: this.levelData.category,
-        // Jika mode campuran, jangan berikan achievement spesifik mode
         gameMode:
           this.levelData.gameMode === "MIXED" ? "" : this.levelData.gameMode,
         score: this.score,
@@ -230,7 +284,11 @@ class GameEngine {
       const newlyUnlocked = this.achievements.checkAndUnlock(sessionData);
       newlyUnlocked.forEach((ach, index) => {
         setTimeout(() => {
-          this.ui.showNotification(`🏆 Pencapaian Terbuka: ${ach.name}`, 3500);
+          this.ui.showNotification(
+            `🏆 Pencapaian Terbuka: ${ach.name}`,
+            3500,
+            "achievement"
+          );
         }, index * 1000);
       });
     }

@@ -14,127 +14,123 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div id="game-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="app-title">Word Adventure</h1>
+        <div class="header-actions">
+          <button id="achievements-btn" class="btn btn-icon">🏆</button>
+          <button
+            id="settings-btn"
+            class="btn btn-icon"
+            aria-label="Pengaturan"
+          >
+            ⚙️
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
       <div id="loading-screen" class="screen active">
-        <h1 class="title">Petualangan Bahasa Inggris</h1>
         <div class="spinner"></div>
         <p class="loading-text">Memuat Permainan...</p>
       </div>
 
       <div id="start-screen" class="screen">
-        <h1 class="title">Ayo Belajar!</h1>
-        <h2 class="subtitle" style="font-size: 1.5em; margin-bottom: 20px">
-          Pilih Topik Belajar
-        </h2>
-
-        <div id="category-selection-container" class="category-grid"></div>
-
-        <div class="start-screen-footer">
-          <div id="difficulty-selection-container" class="difficulty-selector">
-            <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
-            <div class="difficulty-buttons">
-              <button class="btn btn-difficulty" data-difficulty="easy">
-                Mudah
-              </button>
-              <button class="btn btn-difficulty" data-difficulty="medium">
-                Sedang
-              </button>
-              <button class="btn btn-difficulty" data-difficulty="hard">
-                Sulit
-              </button>
+        <div class="screen-content">
+          <h1 class="title">Ayo Belajar!</h1>
+          <h2 class="subtitle">Pilih Topik Untuk Dimainkan</h2>
+          <div id="category-selection-container" class="category-grid"></div>
+          <div class="start-screen-footer">
+            <div
+              id="difficulty-selection-container"
+              class="difficulty-selector"
+            >
+              <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
+              <div class="difficulty-buttons">
+                <button class="btn btn-difficulty" data-difficulty="easy">
+                  Mudah
+                </button>
+                <button class="btn btn-difficulty" data-difficulty="medium">
+                  Sedang
+                </button>
+                <button class="btn btn-difficulty" data-difficulty="hard">
+                  Sulit
+                </button>
+              </div>
             </div>
           </div>
-          <div class="start-screen-actions">
-            <button id="achievements-btn" class="btn btn-icon">🏆</button>
-            <button
-              id="settings-btn"
-              class="btn btn-icon"
-              aria-label="Pengaturan"
-            >
-              ⚙️
-            </button>
-          </div>
         </div>
-      </div>
-
-      <div id="mode-selection-screen" class="screen">
-        <h1 class="title">Pilih Metode Belajar</h1>
-        <h2
-          id="mode-selection-topic"
-          class="subtitle"
-          style="font-size: 1.5em; margin-bottom: 20px"
-        ></h2>
-        <div id="mode-selection-container" class="mode-grid"></div>
-        <button
-          id="back-to-topics-btn"
-          class="btn btn-secondary"
-          style="margin-top: auto; margin-bottom: 20px"
-        >
-          Kembali ke Topik
-        </button>
       </div>
 
       <div id="game-screen" class="screen">
-        <div class="game-header">
-          <span id="level-indicator">Kategori</span>
-          <div class="progress-bar-container">
-            <div id="progress-bar"></div>
+        <div class="screen-content">
+          <div class="game-header">
+            <span id="level-indicator">Kategori</span>
+            <div class="progress-bar-container">
+              <div id="progress-bar"></div>
+            </div>
+            <span id="score-indicator">Skor: 0</span>
           </div>
-          <span id="score-indicator">Skor: 0</span>
-        </div>
-        <div id="challenge-container">
-          <div id="instruction-text"></div>
-          <div id="game-content"></div>
-          <div id="user-input-area"></div>
-        </div>
-        <div class="game-footer">
-          <button id="quit-game-btn" class="btn btn-secondary">Keluar</button>
+          <div id="challenge-container">
+            <div id="instruction-text"></div>
+            <div id="game-content"></div>
+            <div id="user-input-area"></div>
+          </div>
+          <div class="game-footer">
+            <button id="quit-game-btn" class="btn btn-secondary">Keluar</button>
+          </div>
         </div>
       </div>
 
       <div id="level-complete-screen" class="screen">
-        <h2 class="subtitle">Sesi Selesai!</h2>
-        <div id="result-stars-container" class="result-stars"></div>
-        <p class="final-score-text">
-          Skor Akhir: <span id="level-score">0</span>
-        </p>
-        <button id="next-level-btn" class="btn btn-primary">
-          Pilih Topik Lain
-        </button>
+        <div class="screen-content">
+          <h2 class="subtitle">Sesi Selesai!</h2>
+          <div id="result-stars-container" class="result-stars"></div>
+          <p class="final-score-text">
+            Skor Akhir: <span id="level-score">0</span>
+          </p>
+          <button id="next-level-btn" class="btn btn-primary">
+            Pilih Topik Lain
+          </button>
+        </div>
       </div>
+    </main>
 
-      <div id="achievements-screen" class="screen">
-        <h1 class="title">Pencapaian</h1>
-        <div id="achievements-list-container" class="achievements-list"></div>
-        <button
-          id="back-to-start-btn"
-          class="btn btn-secondary"
-          style="margin-top: auto; margin-bottom: 20px"
-        >
-          Kembali
-        </button>
-      </div>
+    <div id="modal-overlay" class="modal-overlay"></div>
 
-      <div id="settings-screen" class="screen">
-        <h2 class="subtitle">Pengaturan</h2>
+    <div id="mode-selection-modal" class="modal">
+      <h1 class="modal-title">Pilih Metode Belajar</h1>
+      <h2 id="mode-selection-topic" class="modal-subtitle"></h2>
+      <div id="mode-selection-container" class="mode-grid"></div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+      <h1 class="modal-title">Pengaturan</h1>
+      <div class="modal-content">
         <div class="settings-option">
           <label for="music-toggle">Musik Latar</label>
           <input type="checkbox" id="music-toggle" class="toggle" />
         </div>
         <div class="settings-option">
-          <label for="sfx-toggle">Efek Suara (SFX)</label>
+          <label for="sfx-toggle">Efek Suara</label>
           <input type="checkbox" id="sfx-toggle" class="toggle" />
         </div>
         <div class="settings-option">
-          <label for="tts-toggle">Suara Panduan (TTS)</label>
+          <label for="tts-toggle">Suara Panduan</label>
           <input type="checkbox" id="tts-toggle" class="toggle" />
         </div>
         <div class="settings-option">
           <label for="dark-mode-toggle">Mode Gelap</label>
           <input type="checkbox" id="dark-mode-toggle" class="toggle" />
         </div>
-        <button id="close-settings-btn" class="btn btn-secondary">Tutup</button>
       </div>
+    </div>
+
+    <div id="achievements-modal" class="modal">
+      <h1 class="modal-title">Pencapaian</h1>
+      <div class="achievements-list" id="achievements-list-container"></div>
+      <button class="btn btn-secondary" data-action="close-modal">Tutup</button>
     </div>
 
     <div id="notification-area"></div>
@@ -157,6 +153,7 @@
     <script src="js/game_modes/2_listen_and_type.js" defer></script>
     <script src="js/game_modes/3_speak_the_word.js" defer></script>
     <script src="js/game_modes/4_sentence_builder.js" defer></script>
+    <script src="js/game_modes/5_ai_story_time.js" defer></script>
     <script src="js/game_engine.js" defer></script>
     <script src="js/main.js" defer></script>
   </body>
