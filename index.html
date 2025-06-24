@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
-    <meta charset="UTF-R" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Petualangan Bahasa Inggris</title>
     <script src="https://sdk.google.ai/gemini-pro.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
@@ -20,25 +23,55 @@
 
       <div id="start-screen" class="screen">
         <h1 class="title">Ayo Belajar!</h1>
-        <h2 class="subtitle" style="font-size: 1.5em; margin-bottom: 20px">Pilih Topik Belajar</h2>
+        <h2 class="subtitle" style="font-size: 1.5em; margin-bottom: 20px">
+          Pilih Topik Belajar
+        </h2>
+
         <div id="category-selection-container" class="category-grid"></div>
-        <div id="difficulty-selection-container" class="difficulty-selector">
-          <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
-          <div class="difficulty-buttons">
-            <button class="btn-difficulty" data-difficulty="easy">Mudah</button>
-            <button class="btn-difficulty" data-difficulty="medium">Sedang</button>
-            <button class="btn-difficulty" data-difficulty="hard">Sulit</button>
+
+        <div class="start-screen-footer">
+          <div id="difficulty-selection-container" class="difficulty-selector">
+            <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
+            <div class="difficulty-buttons">
+              <button class="btn btn-difficulty" data-difficulty="easy">
+                Mudah
+              </button>
+              <button class="btn btn-difficulty" data-difficulty="medium">
+                Sedang
+              </button>
+              <button class="btn btn-difficulty" data-difficulty="hard">
+                Sulit
+              </button>
+            </div>
+          </div>
+          <div class="start-screen-actions">
+            <button id="achievements-btn" class="btn btn-icon">🏆</button>
+            <button
+              id="settings-btn"
+              class="btn btn-icon"
+              aria-label="Pengaturan"
+            >
+              ⚙️
+            </button>
           </div>
         </div>
-        <button id="achievements-btn" class="btn-icon">🏆</button>
-        <button id="settings-btn" class="btn-icon" aria-label="Pengaturan">⚙️</button>
       </div>
 
       <div id="mode-selection-screen" class="screen">
         <h1 class="title">Pilih Metode Belajar</h1>
-        <h2 id="mode-selection-topic" class="subtitle" style="font-size: 1.5em; margin-bottom: 20px;"></h2>
+        <h2
+          id="mode-selection-topic"
+          class="subtitle"
+          style="font-size: 1.5em; margin-bottom: 20px"
+        ></h2>
         <div id="mode-selection-container" class="mode-grid"></div>
-        <button id="back-to-topics-btn" class="btn-secondary" style="margin-top: auto; margin-bottom: 20px;">Kembali ke Topik</button>
+        <button
+          id="back-to-topics-btn"
+          class="btn btn-secondary"
+          style="margin-top: auto; margin-bottom: 20px"
+        >
+          Kembali ke Topik
+        </button>
       </div>
 
       <div id="game-screen" class="screen">
@@ -55,21 +88,31 @@
           <div id="user-input-area"></div>
         </div>
         <div class="game-footer">
-          <button id="quit-game-btn" class="btn-secondary">Keluar</button>
+          <button id="quit-game-btn" class="btn btn-secondary">Keluar</button>
         </div>
       </div>
 
       <div id="level-complete-screen" class="screen">
         <h2 class="subtitle">Sesi Selesai!</h2>
         <div id="result-stars-container" class="result-stars"></div>
-        <p class="final-score-text">Skor Akhir: <span id="level-score">0</span></p>
-        <button id="next-level-btn" class="btn-primary">Pilih Topik Lain</button>
+        <p class="final-score-text">
+          Skor Akhir: <span id="level-score">0</span>
+        </p>
+        <button id="next-level-btn" class="btn btn-primary">
+          Pilih Topik Lain
+        </button>
       </div>
 
       <div id="achievements-screen" class="screen">
         <h1 class="title">Pencapaian</h1>
         <div id="achievements-list-container" class="achievements-list"></div>
-        <button id="back-to-start-btn" class="btn-secondary" style="margin-top: auto; margin-bottom: 20px;">Kembali</button>
+        <button
+          id="back-to-start-btn"
+          class="btn btn-secondary"
+          style="margin-top: auto; margin-bottom: 20px"
+        >
+          Kembali
+        </button>
       </div>
 
       <div id="settings-screen" class="screen">
@@ -90,14 +133,18 @@
           <label for="dark-mode-toggle">Mode Gelap</label>
           <input type="checkbox" id="dark-mode-toggle" class="toggle" />
         </div>
-        <button id="close-settings-btn" class="btn-secondary">Tutup</button>
+        <button id="close-settings-btn" class="btn btn-secondary">Tutup</button>
       </div>
-
-      <div id="notification-area"></div>
-      <audio id="background-music" src="assets/audio/background_music.mp3" loop></audio>
-      <audio id="sfx-correct" src="assets/audio/correct.wav"></audio>
-      <audio id="sfx-wrong" src="assets/audio/wrong.wav"></audio>
     </div>
+
+    <div id="notification-area"></div>
+    <audio
+      id="background-music"
+      src="assets/audio/background_music.mp3"
+      loop
+    ></audio>
+    <audio id="sfx-correct" src="assets/audio/correct.wav"></audio>
+    <audio id="sfx-wrong" src="assets/audio/wrong.wav"></audio>
 
     <script src="js/data.js" defer></script>
     <script src="js/storage_manager.js" defer></script>
