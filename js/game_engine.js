@@ -1,4 +1,4 @@
-// File: js/game_engine.js
+// File: js/game_engine.js (MODIFIED)
 
 class GameEngine {
   constructor(
@@ -29,7 +29,6 @@ class GameEngine {
   }
 
   getAvailableModesForCategory(categoryName) {
-    // ... (Fungsi ini tidak berubah)
     const modeNames = {
       VocabularyMatch: "Cocokkan Gambar",
       ListenAndType: "Dengar & Ketik",
@@ -73,7 +72,6 @@ class GameEngine {
   }
 
   startGame(categoryName, gameModeName) {
-    // ... (Fungsi ini tidak berubah)
     if (gameModeName === "RANDOM" || gameModeName === "MIXED") {
       const availableModes = this.getAvailableModesForCategory(categoryName);
       const modeIds = Object.keys(availableModes);
@@ -88,7 +86,7 @@ class GameEngine {
     this.levelData = {
       gameMode: gameModeName,
       category: categoryName,
-      challengesCount: 5,
+      challengesCount: 20, // Nilai default sudah diubah
     };
 
     this.prepareChallenges();
@@ -104,34 +102,32 @@ class GameEngine {
     this.challenges = [];
     const category = this.levelData.category;
 
-    // --- LOGIKA BARU UNTUK MODE ULASAN ---
     if (this.levelData.gameMode === "REVIEW") {
       const mistakes = this.storage.getMistakesForCategory(category);
-      // Acak urutan soal dari daftar kesalahan
       this.challenges = [...mistakes].sort(() => 0.5 - Math.random());
       this.levelData.challengesCount = this.challenges.length;
       console.log(
         `Memulai Mode Ulasan untuk [${category}] dengan ${this.challenges.length} soal.`
       );
-      return; // Hentikan eksekusi di sini untuk Mode Ulasan
+      return;
     }
-    // --- AKHIR LOGIKA BARU ---
 
-    // Logika untuk mode normal & lainnya
     let challengeCount;
     const difficulty = this.settings.settings.difficulty;
 
     if (this.levelData.gameMode === "AIStoryTime") {
-      challengeCount = 3;
+      challengeCount = 3; // Mode AI Story tetap pendek
     } else if (this.levelData.gameMode === "MIXED") {
-      challengeCount = 7;
+      challengeCount = 25; // Mode campuran lebih banyak
     } else {
-      challengeCount = 5;
+      // --- PERUBAHAN JUMLAH SOAL ---
+      challengeCount = 20; // Jumlah soal dasar
       if (difficulty === "medium") {
-        challengeCount = 7;
+        challengeCount = 25; // Jumlah soal untuk tingkat sedang
       } else if (difficulty === "hard") {
-        challengeCount = 10;
+        challengeCount = 30; // Jumlah soal untuk tingkat sulit
       }
+      // --- AKHIR PERUBAHAN ---
     }
     this.levelData.challengesCount = challengeCount;
 
@@ -147,7 +143,6 @@ class GameEngine {
   }
 
   async nextChallenge() {
-    // ... (Fungsi ini tidak berubah, namun sekarang akan menangani soal dari daftar kesalahan jika dalam mode ulasan)
     if (this.currentChallengeIndex >= this.challenges.length) {
       this.completeSession();
       return;
@@ -162,7 +157,6 @@ class GameEngine {
     let modeName = this.levelData.gameMode;
 
     if (modeName === "MIXED" || modeName === "REVIEW") {
-      // Mode Ulasan juga akan mengacak metode
       const availableModes = this.getAvailableModesForCategory(categoryName);
       const modeIds = Object.keys(availableModes).filter(
         (id) => id !== "AIStoryTime"
@@ -202,20 +196,25 @@ class GameEngine {
     if (isCorrect) {
       this.ui.showNotification("Jawaban Benar! 🎉", 1200, "correct");
 
-      this.score += 10;
+      // --- PERUBAHAN SKOR ---
+      this.score += 5; // Setiap jawaban benar bernilai 5 poin
       this.correctStreak++;
-      if (this.correctStreak >= 3) {
-        const bonusPoints = 5;
+      if (this.correctStreak >= 5) {
+        // Diberi bonus setelah 5x berturut-turut
+        const bonusPoints = 0; // Bonus dinonaktifkan agar skor maksimal 100
         this.score += bonusPoints;
-        this.ui.showNotification(
-          `Rentetan ${this.correctStreak}! +${bonusPoints} Poin!`,
-          2000,
-          "default"
-        );
+        if (bonusPoints > 0) {
+          this.ui.showNotification(
+            `Rentetan ${this.correctStreak}! +${bonusPoints} Poin!`,
+            2000,
+            "default"
+          );
+        }
       }
+      // --- AKHIR PERUBAHAN SKOR ---
+
       this.ui.updateScoreIndicator(this.score);
 
-      // --- LOGIKA BARU: Hapus dari daftar kesalahan jika benar di Mode Ulasan ---
       if (sessionMode === "REVIEW") {
         this.storage.removeMistake(category, currentChallenge);
       }
@@ -223,7 +222,6 @@ class GameEngine {
       this.correctStreak = 0;
       this.ui.triggerScreenShake();
 
-      // --- LOGIKA BARU: Tambahkan ke daftar kesalahan jika salah di mode normal ---
       if (sessionMode !== "REVIEW") {
         this.storage.addMistake(category, currentChallenge);
       }
@@ -258,12 +256,14 @@ class GameEngine {
     setTimeout(() => this.nextChallenge(), timeoutDuration);
   }
 
-  // ... (calculateStars, completeSession, quitGame tidak berubah)
   calculateStars(score, totalChallenges) {
-    const maxScore = totalChallenges * 10;
+    // --- PERUBAHAN PERHITUNGAN SKOR MAKSIMAL ---
+    const maxScore = totalChallenges * 5; // Disesuaikan dengan skor per soal
+    // --- AKHIR PERUBAHAN ---
+
     const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
     if (percentage >= 99) return 3;
-    if (percentage >= 50) return 2;
+    if (percentage >= 60) return 2; // Batas bintang 2 disesuaikan
     if (score > 0) return 1;
     return 0;
   }

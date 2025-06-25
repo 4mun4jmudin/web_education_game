@@ -18,12 +18,13 @@ class VocabularyMatchMode {
     this.onSubmit = onSubmitCallback;
     const correctAnswer = this.challengeData.en;
     const imageId = this.challengeData.id;
+    const categoryName = this.engine.levelData.category;
 
-    let wrongOptionCount = 3; // Mudah
+    let wrongOptionCount = 3;
     if (difficulty === "medium") {
-      wrongOptionCount = 2; // 3 pilihan total
+      wrongOptionCount = 2;
     } else if (difficulty === "hard") {
-      wrongOptionCount = 1; // 2 pilihan total (50/50)
+      wrongOptionCount = 1;
     }
 
     const wrongOptions = categoryWordList
@@ -36,22 +37,46 @@ class VocabularyMatchMode {
       () => 0.5 - Math.random()
     );
 
-    const instruction =
-      dynamicInstruction || `Choose the correct word for the image.`;
+    const instruction = dynamicInstruction || `Pilih gambar yang sesuai.`;
     this.ui.drawInstruction(instruction);
 
+    // --- PERBAIKAN UTAMA DIMULAI DI SINI ---
+    // Definisikan path gambar dasar tanpa ekstensi
+    const imageBasePath = `assets/images/${categoryName}/${imageId}`;
+
     const challengeHtml = `
-            <div class="image-challenge-container">
-                <img src="assets/images/words/${imageId}.png" alt="${correctAnswer}" class="challenge-image">
-            </div>
-            <div class="options-grid" style="grid-template-columns: repeat(${
-              options.length > 2 ? 2 : options.length
-            }, 1fr);">
-                ${options
-                  .map((opt) => `<button class="btn-option">${opt}</button>`)
-                  .join("")}
-            </div>
-        `;
+      <div class="image-challenge-container">
+        <img 
+          src="${imageBasePath}.png" 
+          alt="${correctAnswer}" 
+          class="challenge-image"
+          onerror="
+            // Jika .png gagal, coba .jpg
+            this.onerror=null; 
+            this.src='${imageBasePath}.jpg';
+            // Jika .jpg juga gagal, coba .jpeg
+            this.onerror=function(){
+              this.onerror=null;
+              this.src='${imageBasePath}.jpeg';
+              // Jika semua gagal, tampilkan gambar placeholder atau sembunyikan
+              this.onerror=function(){
+                this.onerror=null;
+                this.src='assets/images/placeholder.png'; // Sediakan gambar placeholder
+              };
+            };
+          "
+        >
+      </div>
+      <div class="options-grid" style="grid-template-columns: repeat(${
+        options.length > 2 ? 2 : options.length
+      }, 1fr);">
+        ${options
+          .map((opt) => `<button class="btn btn-option">${opt}</button>`)
+          .join("")}
+      </div>
+    `;
+    // --- AKHIR PERBAIKAN ---
+
     this.ui.drawChallenge(challengeHtml);
     this.ui.drawUserInput("");
 

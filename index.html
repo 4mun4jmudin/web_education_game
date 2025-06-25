@@ -37,63 +37,52 @@
       </div>
 
       <div id="start-screen" class="screen">
-        <div class="screen-content">
-          <h1 class="title">Ayo Belajar!</h1>
-          <h2 class="subtitle">Pilih Topik Untuk Dimainkan</h2>
-          <div id="category-selection-container" class="category-grid"></div>
-          <div class="start-screen-footer">
-            <div
-              id="difficulty-selection-container"
-              class="difficulty-selector"
-            >
-              <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
-              <div class="difficulty-buttons">
-                <button class="btn btn-difficulty" data-difficulty="easy">
-                  Mudah
-                </button>
-                <button class="btn btn-difficulty" data-difficulty="medium">
-                  Sedang
-                </button>
-                <button class="btn btn-difficulty" data-difficulty="hard">
-                  Sulit
-                </button>
-              </div>
-            </div>
+        <h1 class="title">Ayo Belajar!</h1>
+        <h2 class="subtitle">Pilih Topik Untuk Dimainkan</h2>
+        <div id="category-selection-container" class="category-grid"></div>
+        <div id="difficulty-selection-container" class="difficulty-selector">
+          <h3 class="difficulty-title">Tingkat Kesulitan:</h3>
+          <div class="difficulty-buttons">
+            <button class="btn btn-difficulty" data-difficulty="easy">
+              Mudah
+            </button>
+            <button class="btn btn-difficulty" data-difficulty="medium">
+              Sedang
+            </button>
+            <button class="btn btn-difficulty" data-difficulty="hard">
+              Sulit
+            </button>
           </div>
         </div>
       </div>
 
       <div id="game-screen" class="screen">
-        <div class="screen-content">
-          <div class="game-header">
-            <span id="level-indicator">Kategori</span>
-            <div class="progress-bar-container">
-              <div id="progress-bar"></div>
-            </div>
-            <span id="score-indicator">Skor: 0</span>
+        <div class="game-header">
+          <span id="level-indicator">Kategori</span>
+          <div class="progress-bar-container">
+            <div id="progress-bar"></div>
           </div>
-          <div id="challenge-container">
-            <div id="instruction-text"></div>
-            <div id="game-content"></div>
-            <div id="user-input-area"></div>
-          </div>
-          <div class="game-footer">
-            <button id="quit-game-btn" class="btn btn-secondary">Keluar</button>
-          </div>
+          <span id="score-indicator">Skor: 0</span>
+        </div>
+        <div id="challenge-container">
+          <div id="instruction-text"></div>
+          <div id="game-content"></div>
+          <div id="user-input-area"></div>
+        </div>
+        <div class="game-footer">
+          <button id="quit-game-btn" class="btn btn-secondary">Keluar</button>
         </div>
       </div>
 
       <div id="level-complete-screen" class="screen">
-        <div class="screen-content">
-          <h2 class="subtitle">Sesi Selesai!</h2>
-          <div id="result-stars-container" class="result-stars"></div>
-          <p class="final-score-text">
-            Skor Akhir: <span id="level-score">0</span>
-          </p>
-          <button id="next-level-btn" class="btn btn-primary">
-            Pilih Topik Lain
-          </button>
-        </div>
+        <h2 class="subtitle">Sesi Selesai!</h2>
+        <div id="result-stars-container" class="result-stars"></div>
+        <p class="final-score-text">
+          Skor Akhir: <span id="level-score">0</span>
+        </p>
+        <button id="next-level-btn" class="btn btn-primary">
+          Pilih Topik Lain
+        </button>
       </div>
     </main>
 
@@ -129,7 +118,7 @@
 
     <div id="achievements-modal" class="modal">
       <h1 class="modal-title">Pencapaian</h1>
-      <div class="achievements-list" id="achievements-list-container"></div>
+      <div id="achievements-list-container" class="achievements-list"></div>
       <button class="btn btn-secondary" data-action="close-modal">Tutup</button>
     </div>
 

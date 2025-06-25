@@ -293,8 +293,6 @@ body.dark-mode .screen::before {
 .category-stars .star.active {
   opacity: 1;
 }
-
-/* --- DIFFICULTY & ACTIONS FOOTER --- */
 .start-screen-footer {
   width: 100%;
   margin-top: auto;
