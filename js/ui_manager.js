@@ -1,4 +1,4 @@
-// File: js/ui_manager.js
+// File: js/ui_manager.js (FINAL & PERBAIKAN LENGKAP)
 
 class UIManager {
   constructor() {
@@ -15,24 +15,19 @@ class UIManager {
     this.instructionText = document.getElementById("instruction-text");
     this.gameContent = document.getElementById("game-content");
     this.userInputArea = document.getElementById("user-input-area");
-    this.notificationArea = document.getElementById("notification-area");
+    this.feedbackOverlay = document.getElementById("modal-overlay");
 
     this.activeScreen = this.screens.loading;
-
-    // --- PERBAIKAN DIMULAI DI SINI ---
-    this.onNextLevelCallback = null; // Properti untuk menyimpan fungsi callback
+    this.onNextLevelCallback = null;
     this.nextLevelBtn = document.getElementById("next-level-btn");
 
-    // Pasang event listener hanya sekali saat UIManager dibuat
     if (this.nextLevelBtn) {
       this.nextLevelBtn.addEventListener("click", () => {
-        // Saat diklik, panggil fungsi callback yang tersimpan
         if (this.onNextLevelCallback) {
           this.onNextLevelCallback();
         }
       });
     }
-    // --- AKHIR PERBAIKAN ---
   }
 
   showScreen(screenId) {
@@ -74,13 +69,60 @@ class UIManager {
   }
 
   drawUserInput(htmlContent) {
-    if (this.userInputArea) this.userInputArea.innerHTML = htmlContent;
+    if (this.userInputArea) {
+      this.userInputArea.innerHTML = htmlContent;
+    }
   }
 
-  // --- PERBAIKAN PADA FUNGSI INI ---
-  showLevelCompleteScreen(score, stars, onNextLevelCallback) {
+  displayFeedback(isCorrect, onContinue) {
+    const feedbackClass = isCorrect ? "feedback-correct" : "feedback-wrong";
+    const title = isCorrect ? "🎉 Benar! 🎉" : "❌ Coba Lagi! ❌";
+    const buttonText = "Lanjut";
+
+    const feedbackHTML = `
+      <div class="feedback-modal ${feedbackClass}">
+        <div class="feedback-content">
+          <h2 class="feedback-title">${title}</h2>
+          <button id="feedback-continue-btn" class="btn btn-primary">${buttonText}</button>
+        </div>
+      </div>
+    `;
+
+    if (this.feedbackOverlay) {
+      this.feedbackOverlay.innerHTML = feedbackHTML;
+      this.feedbackOverlay.classList.add("active", "feedback-mode");
+
+      document
+        .getElementById("feedback-continue-btn")
+        .addEventListener("click", () => {
+          this.hideFeedback();
+          onContinue();
+        });
+    }
+  }
+
+  hideFeedback() {
+    if (this.feedbackOverlay) {
+      this.feedbackOverlay.innerHTML = "";
+      this.feedbackOverlay.classList.remove("active", "feedback-mode");
+    }
+  }
+
+  showLevelCompleteScreen(
+    score,
+    stars,
+    correctAnswers,
+    wrongAnswers,
+    onNextLevelCallback
+  ) {
     const scoreEl = document.getElementById("level-score");
     if (scoreEl) scoreEl.textContent = score;
+
+    const correctEl = document.getElementById("correct-count");
+    if (correctEl) correctEl.textContent = correctAnswers;
+
+    const wrongEl = document.getElementById("wrong-count");
+    if (wrongEl) wrongEl.textContent = wrongAnswers;
 
     const starsContainer = document.getElementById("result-stars-container");
     if (starsContainer) {
@@ -94,10 +136,7 @@ class UIManager {
       }
     }
 
-    // Simpan fungsi callback yang baru ke properti class
     this.onNextLevelCallback = onNextLevelCallback;
-
-    // Hapus logika cloneNode yang rumit dan tidak perlu
     this.showScreen("levelComplete");
   }
 
@@ -112,17 +151,16 @@ class UIManager {
   }
 
   showNotification(message, duration = 2000, type = "default") {
-    if (!this.notificationArea) return;
+    const notificationArea = document.getElementById("notification-area");
+    if (!notificationArea) return;
 
     const notification = document.createElement("div");
     notification.className = "notification";
     notification.classList.add(type);
     notification.innerHTML = message;
 
-    this.notificationArea.appendChild(notification);
-
+    notificationArea.appendChild(notification);
     setTimeout(() => notification.classList.add("show"), 10);
-
     setTimeout(() => {
       notification.classList.remove("show");
       notification.addEventListener("transitionend", () => {

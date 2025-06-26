@@ -1,3 +1,5 @@
+// File: js/game_modes/2_listen_and_type.js (VERSI OPTIMISASI)
+
 class ListenAndTypeMode {
   constructor(ui, speech) {
     this.ui = ui;
@@ -5,60 +7,140 @@ class ListenAndTypeMode {
     this.engine = null;
     this.onSubmit = null;
     this.challengeData = null;
+    this.isAnswered = false;
+    this.isCorrect = false;
+    this.userAnswer = "";
+    this.textInput = null;
+    this.submitBtn = null;
+
+    // Inisialisasi efek suara
+    this.soundEffects = {
+      correct: this.createAudio("assets/sounds/correct.mp3"),
+      wrong: this.createAudio("assets/sounds/wrong.mp3"),
+      pop: this.createAudio("assets/sounds/pop.mp3"),
+    };
+  }
+
+  createAudio(src) {
+    const audio = new Audio(src);
+    audio.volume = 0.6;
+    return audio;
   }
 
   start(challengeData, onSubmitCallback, dynamicInstruction) {
+    this.isAnswered = false;
+    this.isCorrect = false;
+    this.userAnswer = "";
     this.challengeData = challengeData;
     this.onSubmit = onSubmitCallback;
-    const correctAnswer = this.challengeData.en.toLowerCase();
+    const correctAnswer = this.challengeData.en;
 
-    const instruction = dynamicInstruction || "Listen and type what you hear.";
-    this.ui.drawInstruction(instruction);
-    this.ui.drawChallenge(""); // Area tantangan utama dikosongkan
+    this.ui.drawInstruction(
+      dynamicInstruction ||
+        `Dengarkan baik-baik, lalu ketik kata yang kamu dengar!`
+    );
+
+    const challengeHtml = `
+      <div class="listen-type-container">
+        <button id="listen-btn" class="btn btn-icon btn-primary">🔊</button>
+      </div>
+    `;
 
     const userInputHtml = `
-            <div class="listen-type-container">
-                <button id="play-sound-btn" class="btn-icon" aria-label="Dengarkan kata">🔊</button>
-                <input type="text" id="text-input" class="text-input" placeholder="Ketik jawabanmu..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                <button id="submit-answer-btn" class="btn-primary">Periksa</button>
-            </div>
-        `;
+      <div class="listen-type-container">
+        <input type="text" id="text-input" class="text-input" placeholder="Ketik di sini..." 
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <button id="submit-answer-btn" class="btn btn-primary">Cek</button>
+      </div>
+    `;
+
+    this.ui.drawChallenge(challengeHtml);
     this.ui.drawUserInput(userInputHtml);
 
-    document.getElementById("play-sound-btn").addEventListener("click", () => {
-      this.speech.speak(this.challengeData.en);
+    this.textInput = document.getElementById("text-input");
+    this.submitBtn = document.getElementById("submit-answer-btn");
+    const listenBtn = document.getElementById("listen-btn");
+
+    // Event listeners
+    listenBtn.addEventListener("click", () => {
+      this.soundEffects.pop.play();
+      this.speech.speak(correctAnswer);
+      this.textInput.focus();
     });
 
-    const submitBtn = document.getElementById("submit-answer-btn");
-    const textInput = document.getElementById("text-input");
+    this.textInput.addEventListener("blur", () => {
+      if (!this.isAnswered) this.textInput.focus();
+    });
 
-    const checkAnswerHandler = () => this.checkAnswer(correctAnswer);
-
-    submitBtn.addEventListener("click", checkAnswerHandler);
-    textInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        checkAnswerHandler();
+    // Satu fungsi handler untuk semua interaksi
+    const handleSubmit = () => {
+      if (this.isAnswered) {
+        this.onSubmit(this.isCorrect, this.userAnswer);
+        return;
       }
-    });
 
-    // Ucapkan kata dan fokuskan pada input
-    setTimeout(() => {
-      this.speech.speak(this.challengeData.en);
-      textInput.focus();
-    }, 300);
+      this.userAnswer = this.textInput.value.trim();
+
+      if (!this.userAnswer) {
+        this.ui.showNotification(
+          "Harap isi jawaban terlebih dahulu!",
+          2000,
+          "wrong"
+        );
+        this.soundEffects.wrong.play();
+        this.textInput.focus();
+        return;
+      }
+
+      this.processAnswer(correctAnswer);
+    };
+
+    this.submitBtn.addEventListener("click", handleSubmit);
+    this.textInput.addEventListener(
+      "keyup",
+      (e) => e.key === "Enter" && handleSubmit()
+    );
+    this.textInput.focus();
   }
 
-  checkAnswer(correctAnswer) {
-    const textInput = document.getElementById("text-input");
-    const userAnswer = textInput.value.trim(); // Dapatkan jawaban asli pengguna
-    const isCorrect = userAnswer.toLowerCase() === correctAnswer;
+  processAnswer(correctAnswer) {
+    this.isCorrect =
+      this.userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+    this.isAnswered = true;
 
-    // Nonaktifkan input setelah jawaban dikirim
-    textInput.disabled = true;
-    document.getElementById("submit-answer-btn").disabled = true;
+    // Update UI
+    this.textInput.disabled = true;
+    this.textInput.classList.add(this.isCorrect ? "correct" : "incorrect");
+    this.submitBtn.textContent = "Lanjut";
+    this.submitBtn.classList.add(
+      this.isCorrect ? "btn-correct" : "btn-incorrect"
+    );
 
-    // Kirim hasil dan jawaban pengguna ke game engine
-    this.onSubmit(isCorrect, userAnswer);
+    // Berikan feedback
+    if (this.isCorrect) {
+      this.soundEffects.correct.play();
+      this.ui.showNotification(
+        `<div class="feedback-content">
+          <span class="feedback-icon">🎉</span>
+          <span class="feedback-text">Jawaban Benar! +5 Poin</span>
+        </div>`,
+        2000,
+        "correct"
+      );
+    } else {
+      this.soundEffects.wrong.play();
+      this.ui.triggerScreenShake();
+      this.ui.showNotification(
+        `<div class="feedback-content">
+          <span class="feedback-icon">😕</span>
+          <span class="feedback-text">Jawaban benar: <strong>${correctAnswer}</strong></span>
+        </div>`,
+        3000,
+        "wrong"
+      );
+      this.ui.drawInstruction(
+        `Jawaban yang benar: <strong>${correctAnswer}</strong>`
+      );
+    }
   }
 }

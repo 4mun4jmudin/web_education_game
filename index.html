@@ -75,14 +75,36 @@
       </div>
 
       <div id="level-complete-screen" class="screen">
-        <h2 class="subtitle">Sesi Selesai!</h2>
-        <div id="result-stars-container" class="result-stars"></div>
-        <p class="final-score-text">
-          Skor Akhir: <span id="level-score">0</span>
-        </p>
-        <button id="next-level-btn" class="btn btn-primary">
-          Pilih Topik Lain
-        </button>
+        <div class="level-complete-content">
+          <hr><hr>
+          <h2>Level Selesai!</h2>
+
+          <div class="score-display">
+            <div class="score-item">
+              <span>Skor:</span>
+              <span id="level-score">0</span>
+            </div>
+
+            <div class="stars-display">
+              <div id="result-stars-container"></div>
+            </div>
+
+            <div class="answers-stats">
+              <div class="stat-item correct-stat">
+                <span>Benar:</span>
+                <span id="correct-count">0</span>
+              </div>
+              <div class="stat-item wrong-stat">
+                <span>Salah:</span>
+                <span id="wrong-count">0</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="next-level-btn" class="btn btn-primary">
+            Kembali ke Menu
+          </button>
+        </div>
       </div>
     </main>
 

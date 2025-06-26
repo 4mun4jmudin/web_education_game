@@ -217,19 +217,22 @@ body.dark-mode .btn-secondary:hover {
   background-color: #444;
 }
 #start-screen {
-  background-image: url('/assets/bg/bg1.png');
+  background-image: url("/assets/bg/bg1.png");
 }
 #game-screen {
-  background-image: url('https://thumbs.dreamstime.com/b/vibrant-cartoon-style-illustration-depicts-cozy-inviting-empty-classroom-perfect-educational-content-children-s-333000646.jpg');
+  background-image: url("/assets/bg/background.png");
 }
 #level-complete-screen {
-  background-image: url('/assets/bg/bg2.png');
+  background-image: url("/assets/bg/bg2.png");
 }
 /* Tambahkan overlay agar teks tetap terbaca */
 .screen::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background-color: rgba(255, 255, 255, 0.4);
   z-index: 0;
 }
@@ -799,14 +802,215 @@ body.dark-mode .screen::before {
     transform: rotate(360deg);
   }
 }
-/* Tambahkan di akhir file css/style.css */
 
-@keyframes pulse-once {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.25); box-shadow: 0 0 0 10px rgba(0, 122, 255, 0.3); }
-  100% { transform: scale(1); }
+/* Kotak modal untuk feedback */
+.feedback-modal {
+  background: var(--surface-bg);
+  padding: 30px 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: scale(0.7);
+  opacity: 0;
+  animation: zoomIn 0.3s forwards;
 }
 
-.pulse-once {
-  animation: pulse-once 0.8s ease-out;
+@keyframes zoomIn {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.feedback-title {
+  font-size: 2.5em;
+  font-weight: 900;
+  margin: 0 0 25px 0;
+}
+
+.feedback-modal.feedback-correct .feedback-title {
+  color: var(--correct-color);
+}
+
+.feedback-modal.feedback-wrong .feedback-title {
+  color: var(--wrong-color);
+}
+
+/* -- CSS TAMBAHAN UNTUK FEEDBACK INSTAN -- */
+
+/* Warna border untuk input teks */
+.text-input.correct {
+  border-color: var(--correct-color);
+  background-color: #314d38; /* Sedikit hijau gelap */
+}
+
+.text-input.incorrect {
+  border-color: var(--wrong-color);
+  background-color: #4d3131; /* Sedikit merah gelap */
+}
+
+/* Warna untuk tombol "Lanjut" */
+.btn.btn-correct {
+  background-color: var(--correct-color);
+  border-color: var(--correct-color);
+}
+
+.btn.btn-incorrect {
+  background-color: var(--wrong-color);
+  border-color: var(--wrong-color);
+}
+/* File: css/style.css */
+
+/* ... (CSS Anda yang sudah ada di bagian atas) ... */
+
+/* --- CSS TAMBAHAN UNTUK STATISTIK LEVEL SELESAI --- */
+
+/* Kontainer utama untuk semua item statistik */
+.level-stats-container {
+  margin-top: 25px; /* Jarak dari bintang di atasnya */
+  padding-top: 20px; /* Jarak di dalam kontainer */
+  border-top: 1px solid var(--border-color-light); /* Garis pemisah tipis */
+  display: flex; /* Membuat item statistik berjajar ke samping */
+  justify-content: space-around; /* Memberi jarak yang sama antar item */
+  width: 100%;
+  gap: 15px; /* Jarak antar item statistik */
+}
+
+/* Setiap item statistik (label dan nilainya) */
+.stat-item {
+  display: flex;
+  flex-direction: column; /* Membuat label di atas dan nilai di bawah */
+  align-items: center; /* Teks menjadi rata tengah */
+  background-color: var(--surface-bg-dark); /* Warna latar sedikit berbeda */
+  padding: 10px 15px;
+  border-radius: 12px;
+  flex-grow: 1; /* Membuat setiap item memiliki lebar yang sama */
+  min-width: 80px; /* Lebar minimum untuk setiap item */
+}
+
+/* Gaya untuk label (teks kecil seperti "Skor Akhir") */
+.stat-label {
+  font-size: 0.9em;
+  color: var(--text-light); /* Warna teks lebih redup */
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* Gaya untuk nilai statistik (angka besar) */
+.stat-value {
+  font-size: 2em; /* Ukuran font lebih besar */
+  font-weight: 700; /* Teks tebal */
+  color: var(--text-color); /* Warna teks utama */
+  line-height: 1;
+}
+
+/* Class khusus untuk memberi warna pada teks jawaban benar */
+.correct-text {
+  color: var(--correct-color);
+}
+
+/* Class khusus untuk memberi warna pada teks jawaban salah */
+.wrong-text {
+  color: var(--wrong-color);
+}
+/* Level Complete Screen Styles */
+.level-complete-content {
+  text-align: center;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.score-display {
+  margin: 20px 0;
+}
+
+.stars-display {
+  margin: 15px 0;
+}
+
+.result-star {
+  width: 40px;
+  height: 40px;
+  margin: 0 5px;
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+
+.result-star.active {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.answers-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 20px 0;
+}
+
+.stat-item {
+  font-size: 18px;
+}
+
+.correct-stat {
+  color: #4caf50;
+}
+
+.wrong-stat {
+  color: #f44336;
+}
+/* style.css */
+
+/* ... (CSS Anda yang sudah ada) ... */
+
+/* --- CSS TAMBAHAN UNTUK GAMBAR KATEGORI --- */
+
+/* Mengubah tombol kategori menjadi flexbox untuk menata layout */
+.btn-category {
+  padding: 10px; /* Sedikit mengurangi padding agar gambar pas */
+  flex-direction: column; /* Menata konten secara vertikal */
+  justify-content: flex-start; /* Konten dimulai dari atas */
+  align-items: stretch; /* Konten meregang selebar tombol */
+  height: 150px; /* Beri tinggi yang tetap untuk konsistensi */
+  overflow: hidden; /* Sembunyikan bagian gambar yang keluar dari border-radius */
+}
+
+/* Kontainer untuk gambar agar bisa diposisikan */
+.category-image-container {
+  width: 100%;
+  height: 60%; /* Gambar mengisi 60% dari tinggi tombol */
+  margin-bottom: 8px; /* Jarak antara gambar dan teks info */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Gaya untuk elemen gambar itu sendiri */
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Pastikan gambar mengisi kontainer tanpa distorsi */
+  transition: transform 0.3s ease; /* Efek transisi untuk hover */
+}
+
+/* Efek zoom saat kursor di atas tombol */
+.btn-category:hover .category-image {
+  transform: scale(1.1);
+}
+
+/* Kontainer untuk info (nama kategori dan bintang) */
+.category-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1; /* Mengisi sisa ruang di bawah gambar */
+}
+
+.category-name {
+  font-size: 1.1em;
+}
+
+.category-stars {
+  margin-top: 5px; /* Jarak antara nama dan bintang */
 }

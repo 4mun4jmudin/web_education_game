@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     achievements
   );
 
-  // ... (registrasi mode game tidak berubah)
+  // Register game modes
   engine.registerGameMode(
     "VocabularyMatch",
     new VocabularyMatchMode(ui, speech)
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedCategoryKey = null;
 
-  // ... (deklarasi elemen DOM tidak berubah)
+  // DOM Elements
   const categoryContainer = document.getElementById(
     "category-selection-container"
   );
@@ -52,12 +52,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const darkModeToggle = document.getElementById("dark-mode-toggle");
   const backgroundMusic = document.getElementById("background-music");
 
-  // ... (fungsi setupCategorySelection tidak berubah)
+  // Updated category selection with local images
   function setupCategorySelection() {
     if (!categoryContainer) return;
     categoryContainer.innerHTML = "";
     const categories = GAME_DATA.categories;
     const allProgress = storage.getAllProgress();
+
+    // Local category images mapping
+    const categoryImages = {
+      animals: "assets/images/categories/animals.jpg",
+      fruits: "assets/images/categories/fruits.jpg",
+      objects: "assets/images/categories/objects.jpg",
+      transportation: "assets/images/categories/transportation.jpg",
+      verbs: "assets/images/categories/verbs.jpg",
+      numbers: "assets/images/categories/numbers.jpg",
+      simpleSentences: "assets/images/categories/simpleSentences.jpg",
+      colors: "assets/images/categories/colors.jpg",
+      shapes2D: "assets/images/categories/shapes2D.jpg",
+      shapes3D: "assets/images/categories/shapes3D.jpg",
+    };
+
     for (const categoryKey in categories) {
       const category = categories[categoryKey];
       const progress = allProgress[categoryKey] || { score: 0, stars: 0 };
@@ -70,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showModeSelectionModal(categoryKey);
       });
 
+      // Create stars HTML
       let starsHtml = '<div class="category-stars">';
       for (let i = 1; i <= 3; i++) {
         const starIcon = `<svg class="star ${
@@ -79,7 +95,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       starsHtml += "</div>";
 
-      let buttonContent = `<span class="category-name">${category.displayName}</span>${starsHtml}`;
+      // Get image path or use default if not found
+      const imagePath =
+        categoryImages[categoryKey] || "assets/images/categories/default.jpg";
+
+      // Button content with image
+      let buttonContent = `
+        <div class="category-image-container">
+          <img src="${imagePath}" alt="${category.displayName}" class="category-image" loading="lazy">
+        </div>
+        <span class="category-name">${category.displayName}</span>
+        ${starsHtml}
+      `;
       button.innerHTML = buttonContent;
       categoryContainer.appendChild(button);
     }
@@ -97,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- FUNGSI INI DIPERBARUI TOTAL ---
   function showModeSelectionModal(categoryKey) {
     const availableModes = engine.getAvailableModesForCategory(categoryKey);
     const modeContainer = document.getElementById("mode-selection-container");
@@ -107,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modeContainer.innerHTML = "";
     topicTitle.textContent = `Topik: ${GAME_DATA.categories[categoryKey].displayName}`;
 
-    // Tombol Mode Ulasan (hanya muncul jika ada kesalahan)
+    // Review mode button (if mistakes exist)
     if (mistakes.length > 0) {
       const reviewButton = document.createElement("button");
       reviewButton.className = "btn btn-mode review-mode";
@@ -119,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modeContainer.appendChild(reviewButton);
     }
 
-    // Tombol mode normal
+    // Normal mode buttons
     for (const modeId in availableModes) {
       const button = document.createElement("button");
       button.className = "btn btn-mode";
@@ -131,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modeContainer.appendChild(button);
     }
 
-    // Tombol mode campuran
+    // Mixed mode button (if multiple modes available)
     if (Object.keys(availableModes).length > 1) {
       const randomButton = document.createElement("button");
       randomButton.className = "btn btn-mode btn-secondary";
@@ -146,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     openModal(modeSelectionModal);
   }
 
-  // ... (sisa file main.js tidak berubah)
   function showSettingsModal() {
     updateSettingsTogglesUI();
     openModal(settingsModal);
@@ -207,6 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.toggle("dark-mode", settings.settings.darkMode);
   }
 
+  // Event Listeners
   quitGameBtn.addEventListener("click", () => engine.quitGame());
   settingsBtn.addEventListener("click", showSettingsModal);
   achievementsBtn.addEventListener("click", showAchievementsModal);
