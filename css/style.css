@@ -799,3 +799,14 @@ body.dark-mode .screen::before {
     transform: rotate(360deg);
   }
 }
+/* Tambahkan di akhir file css/style.css */
+
+@keyframes pulse-once {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); box-shadow: 0 0 0 10px rgba(0, 122, 255, 0.3); }
+  100% { transform: scale(1); }
+}
+
+.pulse-once {
+  animation: pulse-once 0.8s ease-out;
+}
