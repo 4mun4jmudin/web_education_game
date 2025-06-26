@@ -1014,3 +1014,207 @@ body.dark-mode .screen::before {
 .category-stars {
   margin-top: 5px; /* Jarak antara nama dan bintang */
 }
+/* Number Display Styles */
+.number-challenge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px 0;
+  padding: 20px;
+}
+
+.number-display-box {
+  width: 220px;
+  height: 220px;
+  background-color: #ffffff;
+  border: 10px solid #3498db;
+  border-radius: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.number-display {
+  font-size: 120px;
+  font-weight: bold;
+  color: #2c3e50;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .number-display-box {
+    width: 180px;
+    height: 180px;
+    border-width: 8px;
+  }
+
+  .number-display {
+    font-size: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .number-display-box {
+    width: 150px;
+    height: 150px;
+    border-width: 6px;
+  }
+
+  .number-display {
+    font-size: 70px;
+  }
+}
+
+/* Color Challenge Styles */
+.color-challenge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.color-display-box {
+  width: 200px;
+  height: 200px;
+  border-radius: 15px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.color-name-label {
+  background-color: rgba(255,255,255,0.8);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.options-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.btn-option.color-option {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid #333;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-option.color-option:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Text contrast for dark backgrounds */
+.btn-option.color-option[style*="#000000"],
+.btn-option.color-option[style*="#00008B"],
+.btn-option.color-option[style*="#006400"],
+.btn-option.color-option[style*="#800080"] {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+
+/* Highlight correct/incorrect answers */
+.correct-option {
+  animation: pulseCorrect 1s;
+  border: 3px solid #2ecc71 !important;
+}
+
+.incorrect-option {
+  animation: shake 0.5s;
+  border: 3px solid #e74c3c !important;
+}
+
+@keyframes pulseCorrect {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+/*================================================================*/
+/* Desain CSS untuk Tantangan Mencocokkan Kata Kerja (Verbs)      */
+/* Tambahkan ini ke file CSS utama Anda                           */
+/*================================================================*/
+
+/**
+ * Kontainer utama yang membungkus kotak kata kerja.
+ * Fungsinya untuk memusatkan kotak dan memberi ruang.
+ */
+ .verb-challenge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 450px; /* Atur lebar maksimum kotak */
+  margin: 0 auto 25px auto; /* Jarak atas, (auto) tengah, jarak bawah 25px */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/**
+* Kotak utama yang menampilkan kata kerja.
+* Didesain agar terlihat seperti kartu/foto yang modern dan bersih.
+*/
+.verb-display-box {
+  display: flex; /* Menggunakan Flexbox untuk memusatkan teks di dalamnya */
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9; /* Menjaga rasio aspek seperti layar atau foto (16:9) */
+  background: linear-gradient(135deg, #ffffff, #f8f9fa); /* Gradien halus untuk latar belakang */
+  border-radius: 16px; /* Sudut yang membulat agar terlihat lebih modern */
+  border: 1px solid #dee2e6; /* Garis tepi (border) yang tipis dan lembut */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08); /* Efek bayangan untuk membuatnya 'terangkat' dari layar */
+  padding: 20px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animasi transisi saat hover */
+}
+
+/* Efek saat kursor mouse berada di atas kotak */
+.verb-display-box:hover {
+  transform: translateY(-5px) scale(1.02); /* Sedikit terangkat dan membesar */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 15px 25px rgba(0, 0, 0, 0.1); /* Bayangan menjadi lebih jelas */
+}
+
+/**
+* Teks kata kerja (Bahasa Indonesia) di dalam kotak.
+*/
+.verb-display {
+  /* Ganti 'Your-Game-Font' dengan nama font yang Anda gunakan */
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 2.8em; /* Ukuran font besar agar mudah dibaca */
+  font-weight: 600; /* Sedikit lebih tebal dari normal */
+  color: #212529; /* Warna teks gelap agar kontras dengan latar belakang */
+  text-align: center;
+}
+
+/* Penyesuaian untuk layar yang lebih kecil (Responsive Design) */
+@media (max-width: 480px) {
+  .verb-display-box {
+      aspect-ratio: 4 / 3; /* Mengubah rasio aspek agar lebih cocok di layar kecil */
+  }
+  .verb-display {
+      font-size: 2.2em; /* Mengecilkan ukuran font di layar kecil */
+  }
+}

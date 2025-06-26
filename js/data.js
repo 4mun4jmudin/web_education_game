@@ -595,9 +595,9 @@ const GAME_DATA = {
       ],
     },
     colors: {
-      displayName: "Colors",
+      displayName: "colors",
       words: [
-        // Basic Colors
+        // Warna Dasar
         { en: "Red", id: "Merah", image: "red.jpg" },
         { en: "Blue", id: "Biru", image: "blue.jpg" },
         { en: "Green", id: "Hijau", image: "green.jpg" },
@@ -611,37 +611,14 @@ const GAME_DATA = {
         { en: "Gray", id: "Abu-abu", image: "gray.jpg" },
         { en: "Gold", id: "Emas", image: "gold.jpg" },
         { en: "Silver", id: "Perak", image: "silver.jpg" },
-        { en: "Turquoise", id: "Pirus", image: "turquoise.jpg" },
 
-        // Shades & Variants (English-Indonesian)
+        // Variasi Warna Umum
         { en: "Dark Red", id: "Merah Tua", image: "dark_red.jpg" },
         { en: "Light Blue", id: "Biru Muda", image: "light_blue.jpg" },
-        { en: "Lime Green", id: "Hijau Limau", image: "lime_green.jpg" },
-        { en: "Dark Green", id: "Hijau Gelap", image: "dark_green.jpg" },
+        { en: "Dark Green", id: "Hijau Tua", image: "dark_green.jpg" },
         { en: "Sky Blue", id: "Biru Langit", image: "sky_blue.jpg" },
-        { en: "Navy Blue", id: "Biru Dongker", image: "navy_blue.jpg" },
         { en: "Beige", id: "Krem", image: "beige.jpg" },
-        { en: "Maroon", id: "Merah Marun", image: "maroon.jpg" },
-        { en: "Violet", id: "Violet", image: "violet.jpg" },
-        { en: "Magenta", id: "Magenta", image: "magenta.jpg" },
-        { en: "Cyan", id: "Sian", image: "cyan.jpg" },
         { en: "Indigo", id: "Nila", image: "indigo.jpg" },
-        { en: "Olive", id: "Zaitun", image: "olive.jpg" },
-        { en: "Teal", id: "Teal", image: "teal.jpg" },
-        { en: "Lavender", id: "Lavender", image: "lavender.jpg" },
-        { en: "Salmon", id: "Salmon", image: "salmon.jpg" },
-        { en: "Crimson", id: "Merah Crimson", image: "crimson.jpg" },
-        { en: "Ivory", id: "Gading", image: "ivory.jpg" },
-        { en: "Charcoal", id: "Arang", image: "charcoal.jpg" },
-        { en: "Ruby", id: "Ruby", image: "ruby.jpg" },
-        { en: "Amber", id: "Amber", image: "amber.jpg" },
-        { en: "Mint Green", id: "Hijau Mint", image: "mint_green.jpg" },
-        { en: "Peach", id: "Persik", image: "peach.jpg" },
-        { en: "Rose", id: "Merah Muda (Rose)", image: "rose.jpg" },
-        { en: "Mustard", id: "Kuning Mustar", image: "mustard.jpg" },
-        { en: "Burgundy", id: "Burgundi", image: "burgundy.jpg" },
-        { en: "Coral", id: "Koral", image: "coral.jpg" },
-        { en: "Slate Gray", id: "Abu-abu Slate", image: "slate_gray.jpg" },
       ],
     },
     shapes2D: {

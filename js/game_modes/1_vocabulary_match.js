@@ -1,4 +1,4 @@
-// File: js/game_modes/1_vocabulary_match.js (DENGAN FEEDBACK SUARA)
+// File: js/game_modes/1_vocabulary_match.js (DENGAN PEMBARUAN UNTUK KATEGORI VERBS)
 
 class VocabularyMatchMode {
   constructor(ui, speech) {
@@ -22,7 +22,7 @@ class VocabularyMatchMode {
     return audio;
   }
 
-  // Fungsi baru untuk mencoba memuat gambar dengan berbagai variasi nama
+  // Fungsi untuk mencoba memuat gambar dengan berbagai variasi nama
   async loadImageWithFallbacks(category, imageId) {
     const basePath = `assets/images/${category}`;
     const extensions = [".jpg", ".jpeg", ".png", ".webp"];
@@ -35,7 +35,7 @@ class VocabularyMatchMode {
         try {
           const exists = await this.checkImageExists(imageUrl);
           if (exists) {
-            return imageUrl; // Kembalikan URL yang valid
+            return imageUrl;
           }
         } catch (e) {
           console.log(`Image not found: ${imageUrl}`);
@@ -43,7 +43,6 @@ class VocabularyMatchMode {
       }
     }
 
-    // Jika tidak ditemukan, kembalikan placeholder
     return "assets/images/placeholder.png";
   }
 
@@ -51,23 +50,15 @@ class VocabularyMatchMode {
   generateNameVariations(name) {
     const variations = new Set();
 
-    // Tambahkan versi original
     variations.add(name);
-
-    // Tambahkan versi lowercase
     variations.add(name.toLowerCase());
-
-    // Tambahkan versi dengan underscore dan dash
     variations.add(name.replace(/\s+/g, "_"));
     variations.add(name.replace(/\s+/g, "-"));
     variations.add(name.toLowerCase().replace(/\s+/g, "_"));
     variations.add(name.toLowerCase().replace(/\s+/g, "-"));
-
-    // Tambahkan versi tanpa spasi
     variations.add(name.replace(/\s+/g, ""));
     variations.add(name.toLowerCase().replace(/\s+/g, ""));
 
-    // Tambahkan versi dengan camelCase jika ada spasi
     if (name.includes(" ")) {
       const camelCase = name
         .split(" ")
@@ -123,37 +114,118 @@ class VocabularyMatchMode {
       () => 0.5 - Math.random()
     );
 
-    const instruction = dynamicInstruction || `Pilih gambar yang sesuai.`;
+    // [MODIFIKASI INSTRUKSI] Tambahkan penanganan untuk 'verbs'
+    const instruction =
+      dynamicInstruction ||
+      (categoryName === "numbers" || categoryName === "verbs" // Verbs menggunakan instruksi yang sama dengan numbers
+        ? "Pilih terjemahan yang benar:"
+        : categoryName === "colors"
+        ? "Pilih nama warna yang sesuai:"
+        : "Pilih gambar yang sesuai.");
     this.ui.drawInstruction(instruction);
 
-    // Dapatkan URL gambar yang valid
-    const validImageUrl = await this.loadImageWithFallbacks(
-      categoryName,
-      imageId
-    );
+    // Khusus untuk kategori numbers
+    if (categoryName === "numbers") {
+      const challengeHtml = `
+        <div class="number-challenge-container">
+          <div class="number-display-box">
+            <span class="number-display">${this.challengeData.id}</span>
+          </div>
+        </div>
+        <div class="options-grid" style="grid-template-columns: repeat(${
+          options.length > 2 ? 2 : options.length
+        }, 1fr);">
+          ${options
+            .map((opt) => `<button class="btn btn-option">${opt}</button>`)
+            .join("")}
+        </div>
+      `;
+      this.ui.drawChallenge(challengeHtml);
+    }
+    // Blok logika khusus untuk kategori 'colors'
+    else if (categoryName === "colors") {
+      const colorMap = {
+        Merah: "#FF0000", Biru: "#0000FF", Hijau: "#008000", Kuning: "#FFFF00", Jingga: "#FFA500",
+        Ungu: "#800080", Hitam: "#000000", Putih: "#FFFFFF", "Merah Muda": "#FFC0CB", Cokelat: "#A52A2A",
+        "Abu-abu": "#808080", Emas: "#FFD700", Perak: "#C0C0C0", "Merah Tua": "#8B0000", "Biru Muda": "#ADD8E6",
+        "Hijau Tua": "#006400", "Biru Langit": "#87CEEB", Krem: "#F5F5DC", Nila: "#4B0082", Pirus: "#40E0D0",
+        "Hijau Kebiruan": "#008080", Magenta: "#FF00FF", "Biru Laut": "#000080", "Merah Marun": "#800000",
+        Lavender: "#E6E6FA", "Merah Anggur": "#800020", "Merah Koral": "#FF7F50", Salmon: "#FA8072",
+        Persik: "#FFE5B4", "Hijau Mint": "#98FF98", Gading: "#FFFFF0", "Kuning Pucat": "#FFFACD",
+        "Hijau Zaitun": "#808000", Khaki: "#F0E68C", Perunggu: "#CD7F32", Tembaga: "#B87333",
+        "Merah Bata": "#B22222", "Cokelat Tua": "#654321",
+      };
+      const colorValue = colorMap[this.challengeData.id] || "#CCCCCC";
 
-    const challengeHtml = `
-      <div class="image-challenge-container">
-        <img 
-          src="${validImageUrl}" 
-          alt="${correctAnswer}" 
-          class="challenge-image"
-          onerror="this.src='assets/images/placeholder.png'"
-        >
-      </div>
-      <div class="options-grid" style="grid-template-columns: repeat(${
-        options.length > 2 ? 2 : options.length
-      }, 1fr);">
-        ${options
-          .map((opt) => `<button class="btn btn-option">${opt}</button>`)
-          .join("")}
-      </div>
-    `;
+      const challengeHtml = `
+        <div class="color-challenge-container">
+          <div class="color-display-box" style="background-color: ${colorValue}">
+          </div>
+        </div>
+        <div class="options-grid" style="grid-template-columns: repeat(${
+          options.length > 2 ? 2 : options.length
+        }, 1fr);">
+          ${options
+            .map((opt) => `<button class="btn btn-option">${opt}</button>`)
+            .join("")}
+        </div>
+      `;
+      this.ui.drawChallenge(challengeHtml);
+    }
+    // [START PEMBARUAN] Blok logika khusus untuk kategori 'verbs'
+    else if (categoryName === "verbs") {
+      // Tampilkan kata kerja Bhs. Indonesia dalam sebuah kotak, bukan gambar.
+      // Anda mungkin perlu menambahkan styling untuk .verb-display-box di file CSS Anda
+      // agar terlihat seperti kotak/kartu. Contoh:
+      // .verb-display-box { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      // padding: 40px 20px; font-size: 2em; text-align: center; }
+      const challengeHtml = `
+        <div class="verb-challenge-container">
+          <div class="verb-display-box">
+            <span class="verb-display">${this.challengeData.id}</span>
+          </div>
+        </div>
+        <div class="options-grid" style="grid-template-columns: repeat(${
+          options.length > 2 ? 2 : options.length
+        }, 1fr);">
+          ${options
+            .map((opt) => `<button class="btn btn-option">${opt}</button>`)
+            .join("")}
+        </div>
+      `;
+      this.ui.drawChallenge(challengeHtml);
+    }
+    // [END PEMBARUAN]
+    // Untuk kategori lainnya (animals, fruits, dll), gunakan logika gambar.
+    else {
+      const validImageUrl = await this.loadImageWithFallbacks(
+        categoryName,
+        imageId
+      );
 
-    this.ui.drawChallenge(challengeHtml);
+      const challengeHtml = `
+        <div class="image-challenge-container">
+          <img
+            src="${validImageUrl}"
+            alt="${correctAnswer}"
+            class="challenge-image"
+            onerror="this.src='assets/images/placeholder.png'"
+          >
+        </div>
+        <div class="options-grid" style="grid-template-columns: repeat(${
+          options.length > 2 ? 2 : options.length
+        }, 1fr);">
+          ${options
+            .map((opt) => `<button class="btn btn-option">${opt}</button>`)
+            .join("")}
+        </div>
+      `;
+      this.ui.drawChallenge(challengeHtml);
+    }
+
     this.ui.drawUserInput("");
 
-    // Mainkan suara untuk kata yang benar
+    // Mainkan suara untuk kata yang benar (dalam Bahasa Inggris)
     this.speech.speak(correctAnswer);
 
     // Tambahkan event listener untuk semua opsi
