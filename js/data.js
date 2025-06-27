@@ -625,22 +625,22 @@ const GAME_DATA = {
       displayName: "2D Shapes",
       words: [
         // Basic Shapes
-        { en: "Circle", id: "Lingkaran", image: "circle.jpg" },
-        { en: "Square", id: "Persegi", image: "square.jpg" },
-        { en: "Triangle", id: "Segitiga", image: "triangle.jpg" },
+        { en: "Circle", id: "Lingkaran", image: "circle.png" },
+        { en: "Square", id: "Persegi", image: "square.png" },
+        { en: "Triangle", id: "Segitiga", image: "triangle.png" },
         { en: "Rectangle", id: "Persegi Panjang", image: "rectangle.jpg" },
         { en: "Oval", id: "Oval", image: "oval.jpg" },
         { en: "Diamond", id: "Belah Ketupat", image: "diamond.jpg" },
-        { en: "Star", id: "Bintang", image: "star.jpg" },
-        { en: "Heart", id: "Hati", image: "heart.jpg" },
+        { en: "Star", id: "Bintang", image: "star.png" },
+        { en: "Heart", id: "Hati", image: "heart.png" },
 
         // Polygons (Segi Banyak)
-        { en: "Pentagon", id: "Segilima", image: "pentagon.jpg" },
-        { en: "Hexagon", id: "Segienam", image: "hexagon.jpg" },
-        { en: "Heptagon", id: "Segitujuh", image: "heptagon.jpg" },
-        { en: "Octagon", id: "Segidelapan", image: "octagon.jpg" },
-        { en: "Nonagon", id: "Segisembilan", image: "nonagon.jpg" },
-        { en: "Decagon", id: "Segi sepuluh", image: "decagon.jpg" },
+        { en: "Pentagon", id: "Segilima", image: "pentagon.png" },
+        { en: "Hexagon", id: "Segienam", image: "hexagon.png" },
+        { en: "Heptagon", id: "Segitujuh", image: "heptagon.png" },
+        { en: "Octagon", id: "Segidelapan", image: "octagon.png" },
+        { en: "Nonagon", id: "Segisembilan", image: "nonagon.png" },
+        { en: "Decagon", id: "Segi sepuluh", image: "decagon.png" },
 
         // Quadrilaterals (Segi Empat)
         {
@@ -648,23 +648,23 @@ const GAME_DATA = {
           id: "Jajar Genjang",
           image: "parallelogram.jpg",
         },
-        { en: "Trapezoid", id: "Trapesium", image: "trapezoid.jpg" },
-        { en: "Kite", id: "Layang-layang", image: "kite.jpg" },
-        { en: "Rhombus", id: "Belah Ketupat", image: "rhombus.jpg" },
+        { en: "Trapezoid", id: "Trapesium", image: "trapezoid.png" },
+        { en: "Kite", id: "Layang-layang", image: "kite.png" },
+        { en: "Rhombus", id: "Belah Ketupat", image: "rhombus.png" },
 
         // Curved & Irregular Shapes
-        { en: "Semicircle", id: "Setengah Lingkaran", image: "semicircle.jpg" },
-        { en: "Crescent", id: "Bulan Sabit", image: "crescent.jpg" },
-        { en: "Ellipse", id: "Elips", image: "ellipse.jpg" },
-        { en: "Annulus", id: "Cincin Lingkaran", image: "annulus.jpg" },
-        { en: "Sector", id: "Juring Lingkaran", image: "sector.jpg" },
-        { en: "Segment", id: "Tembereng Lingkaran", image: "segment.jpg" },
+        { en: "Semicircle", id: "Setengah Lingkaran", image: "semicircle.png" },
+        { en: "Crescent", id: "Bulan Sabit", image: "crescent.png" },
+        { en: "Ellipse", id: "Elips", image: "ellipse.png" },
+        { en: "Annulus", id: "Cincin Lingkaran", image: "annulus.png" },
+        { en: "Sector", id: "Juring Lingkaran", image: "sector.png" },
+        { en: "Segment", id: "Tembereng Lingkaran", image: "segment.png" },
 
         // Abstract/Symbolic Shapes
-        { en: "Cross", id: "Salib", image: "cross.jpg" },
-        { en: "Arrow", id: "Panah", image: "arrow.jpg" },
-        { en: "Cloud", id: "Awan", image: "cloud.jpg" },
-        { en: "Lightning Bolt", id: "Petir", image: "lightning_bolt.jpg" },
+        { en: "Cross", id: "Salib", image: "cross.png" },
+        { en: "Arrow", id: "Panah", image: "arrow.png" },
+        { en: "Cloud", id: "Awan", image: "cloud.png" },
+        { en: "Lightning Bolt", id: "Petir", image: "lightning_bolt.png" },
       ],
     },
     shapes3D: {
@@ -673,45 +673,26 @@ const GAME_DATA = {
         // Basic 3D Shapes
         { en: "Cube", id: "Kubus", image: "cube.jpg" },
         { en: "Sphere", id: "Bola", image: "sphere.jpg" },
-        { en: "Cone", id: "Kerucut", image: "cone.jpg" },
-        { en: "Cylinder", id: "Tabung", image: "cylinder.jpg" },
-        { en: "Pyramid", id: "Limas", image: "pyramid.jpg" },
-        { en: "Cuboid", id: "Balok", image: "cuboid.jpg" },
+        { en: "Cone", id: "Kerucut", image: "cone.png" },
+        { en: "Cylinder", id: "Tabung", image: "cylinder.png" },
+        { en: "Pyramid", id: "Limas", image: "pyramid.png" },
+        { en: "Cuboid", id: "Balok", image: "cuboid.png" },
 
         // Prisms & Platonic Solids
         {
           en: "Triangular Prism",
           id: "Prisma Segitiga",
-          image: "triangular_prism.jpg",
+          image: "triangular_prism.png",
         },
         {
           en: "Pentagonal Prism",
           id: "Prisma Segilima",
-          image: "pentagonal_prism.jpg",
+          image: "pentagonal_prism.png",
         },
         {
           en: "Hexagonal Prism",
           id: "Prisma Segienam",
           image: "hexagonal_prism.jpg",
-        },
-        { en: "Tetrahedron", id: "Tetrahedron", image: "tetrahedron.jpg" },
-        { en: "Octahedron", id: "Oktahedron", image: "octahedron.jpg" },
-        { en: "Dodecahedron", id: "Dodekahedron", image: "dodecahedron.jpg" },
-        { en: "Icosahedron", id: "Ikosahedron", image: "icosahedron.jpg" },
-
-        // Curved 3D Shapes
-        { en: "Torus", id: "Torus (Donat)", image: "torus.jpg" },
-        { en: "Hemisphere", id: "Setengah Bola", image: "hemisphere.jpg" },
-        { en: "Ellipsoid", id: "Elipsoid", image: "ellipsoid.jpg" },
-        { en: "Paraboloid", id: "Paraboloid", image: "paraboloid.jpg" },
-
-        // Real-World 3D Forms
-        { en: "Capsule", id: "Kapsul", image: "capsule.jpg" },
-        { en: "Pipe", id: "Pipa", image: "pipe.jpg" },
-        {
-          en: "Frustum",
-          id: "Frustum (Kerucut Terpancung)",
-          image: "frustum.jpg",
         },
       ],
     },

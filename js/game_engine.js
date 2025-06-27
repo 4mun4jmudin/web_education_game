@@ -108,11 +108,11 @@ class GameEngine {
     let challengeCount;
     const difficulty = this.settings.settings.difficulty;
     if (this.levelData.gameMode === "AIStoryTime") {
-      challengeCount = 3;
+      challengeCount = 20;
     } else if (this.levelData.gameMode === "MIXED") {
-      challengeCount = 3;
+      challengeCount = 25;
     } else {
-      challengeCount = 3;
+      challengeCount = 30;
       if (difficulty === "medium") challengeCount = 3;
       else if (difficulty === "hard") challengeCount = 3;
     }
@@ -120,10 +120,12 @@ class GameEngine {
     const categoryWords = [...GAME_DATA.categories[category].words];
     categoryWords.sort(() => 0.5 - Math.random());
     for (let i = 0; i < this.levelData.challengesCount; i++) {
-      this.challenges.push({
-        en: categoryWords[i % categoryWords.length]?.en || "challenge",
-        id: categoryWords[i % categoryWords.length]?.id || "challenge",
-      });
+      // PERUBAHAN: Mendorong seluruh objek kata, bukan hanya en dan id.
+      // Ini memastikan properti 'image' juga ikut terbawa.
+      const wordData = categoryWords[i % categoryWords.length];
+      if (wordData) {
+        this.challenges.push(wordData);
+      }
     }
   }
 
