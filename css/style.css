@@ -1,4 +1,4 @@
-/* File: css/style.css (Professional Redesign - Final Comprehensive Fix) */
+/* File: css/style.css (Implementasi Final dengan Perbaikan Dark Mode) */
 
 :root {
   --font-family: "Nunito", sans-serif;
@@ -17,19 +17,56 @@
   /* Shared Colors */
   --correct-color: #34c759;
   --wrong-color: #ff3b30;
+
+  /* Variabel Tambahan untuk feedback, statistik, dan box */
+  --correct-bg-color: rgba(52, 199, 89, 0.15);
+  --incorrect-bg-color: rgba(255, 59, 48, 0.15);
+  --stat-bg-color: rgba(255, 255, 255, 0.5);
+  --box-bg-gradient: linear-gradient(135deg, #ffffff, #f8f9fa);
+  --box-border-color: #dee2e6;
+  --display-text-color: #2c3e50;
 }
 
+body.dark-mode .title,
+body.dark-mode .subtitle,
+body.dark-mode .difficulty-title {
+  text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .btn-difficulty:hover {
+  opacity: 1;
+}
+
+body.dark-mode .btn-difficulty.active {
+  color: white;
+  opacity: 1;
+}
+
+body.dark-mode #instruction-text,
+body.dark-mode .word-to-speak,
+body.dark-mode .pronunciation-hint,
+body.dark-mode #recognition-status {
+  text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.8);
+}
 /* Dark Mode Palette */
 body.dark-mode {
   --bg-gradient-start: #2c3e50;
   --bg-gradient-end: #4b79a1;
   --primary-color: #5e5ce6;
   --secondary-color: #00d4c8;
-  --text-color: #f5f5f7;
-  --text-light: #a6a6a6;
+  --text-color: #ffffff;
+  --text-light: #d1d5db;
   --surface-bg: rgba(28, 28, 30, 0.75);
   --surface-border: rgba(255, 255, 255, 0.15);
   --shadow-color: rgba(0, 0, 0, 0.25);
+
+  /* Variabel Tambahan untuk dark mode */
+  --correct-bg-color: #314d38;
+  --incorrect-bg-color: #4d3131;
+  --stat-bg-color: rgba(28, 28, 30, 0.75);
+  --box-bg-gradient: linear-gradient(135deg, #3a3a3c, #2c2c2e);
+  --box-border-color: rgba(255, 255, 255, 0.15);
+  --display-text-color: #ffffff;
 }
 
 /* --- BASE & LAYOUT --- */
@@ -96,7 +133,7 @@ body {
 .app-main {
   flex-grow: 1;
   position: relative;
-  padding-top: 71px;
+  /* padding-top: 71px; */
   width: 100%;
 }
 
@@ -107,11 +144,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  padding: 20px;
+  padding: 91px 20px 20px;
   display: none;
   flex-direction: column;
   align-items: center;
-  overflow: hidden; /* Kontrol scroll di .screen-content */
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -134,6 +171,36 @@ body {
   height: 100%;
   max-width: var(--content-width, 500px);
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Overlay untuk gambar latar */
+.screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+  z-index: 0;
+  transition: background-color 0.5s ease;
+}
+
+body.dark-mode .screen::before {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Background images */
+#start-screen {
+  background-image: url("/assets/bg/bg1.jpg");
+}
+#game-screen {
+  background-image: url("/assets/bg/bg1.jpg");
+}
+#level-complete-screen {
+  background-image: url("/assets/bg/bg2.png");
 }
 
 /* --- JUDUL & SUBJUDUL --- */
@@ -209,40 +276,6 @@ body {
   color: var(--primary-color);
   background-color: var(--surface-border);
 }
-body.dark-mode .btn-secondary {
-  background-color: #333;
-  color: var(--text-color);
-}
-body.dark-mode .btn-secondary:hover {
-  background-color: #444;
-}
-#start-screen {
-  background-image: url("/assets/bg/bg1.png");
-}
-#game-screen {
-  background-image: url("/assets/bg/background.png");
-}
-#level-complete-screen {
-  background-image: url("/assets/bg/bg2.png");
-}
-/* Tambahkan overlay agar teks tetap terbaca */
-.screen::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: rgba(255, 255, 255, 0.4);
-  z-index: 0;
-}
-body.dark-mode .screen::before {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-.screen-content {
-  position: relative;
-  z-index: 1;
-}
 
 /* --- HALAMAN UTAMA (#start-screen) --- */
 #start-screen .screen-content {
@@ -260,23 +293,47 @@ body.dark-mode .screen::before {
   padding: 5px;
 }
 .btn-category {
-  padding: 20px;
-  min-height: 120px;
+  padding: 10px;
+  height: 150px;
   background-color: var(--surface-bg);
   border: 1px solid var(--surface-border);
   border-radius: 16px;
   box-shadow: 0 5px 15px var(--shadow-color);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: stretch;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 .btn-category:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px var(--shadow-color);
   border-color: var(--primary-color);
+}
+.category-image-container {
+  width: 100%;
+  height: 60%;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.btn-category:hover .category-image {
+  transform: scale(1.1);
+}
+.category-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
 }
 .category-name {
   font-weight: 700;
@@ -286,6 +343,7 @@ body.dark-mode .screen::before {
 .category-stars {
   display: flex;
   gap: 4px;
+  margin-top: 5px;
 }
 .category-stars .star {
   width: 16px;
@@ -295,12 +353,6 @@ body.dark-mode .screen::before {
 }
 .category-stars .star.active {
   opacity: 1;
-}
-.start-screen-footer {
-  width: 100%;
-  margin-top: auto;
-  padding: 10px 0 0 0;
-  flex-shrink: 0;
 }
 .difficulty-selector {
   width: 100%;
@@ -330,14 +382,6 @@ body.dark-mode .screen::before {
   background: var(--primary-color);
   color: white;
   box-shadow: 0 2px 8px -2px var(--primary-color);
-}
-.start-screen-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 10px;
-  margin-top: 15px;
 }
 
 /* --- HALAMAN PERMAINAN (#game-screen) --- */
@@ -390,7 +434,7 @@ body.dark-mode .screen::before {
   flex-shrink: 0;
 }
 
-/* --- ELEMEN-ELEMEN MODE PERMAINAN (STYLING FINAL) --- */
+/* --- ELEMEN MODE PERMAINAN --- */
 .challenge-image {
   max-width: 200px;
   max-height: 200px;
@@ -403,6 +447,8 @@ body.dark-mode .screen::before {
   grid-template-columns: 1fr 1fr;
   gap: 15px;
   width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 .btn-option {
   padding: 20px 10px;
@@ -441,11 +487,6 @@ body.dark-mode .screen::before {
   border-color: var(--primary-color);
   outline: none;
   box-shadow: 0 0 0 3px var(--primary-color);
-}
-.listen-type-container .btn-primary {
-  height: 55px;
-  padding: 0 20px;
-  flex-shrink: 0;
 }
 .speak-word-container {
   display: flex;
@@ -495,8 +536,6 @@ body.dark-mode .screen::before {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 44px;
-  height: 44px;
 }
 .story-question {
   font-size: 1.3em;
@@ -545,6 +584,45 @@ body.dark-mode .screen::before {
   display: flex;
   gap: 15px;
   justify-content: center;
+}
+
+/* --- FEEDBACK INSTAN & HIGHLIGHT --- */
+.text-input.correct {
+  border-color: var(--correct-color);
+  background-color: var(--correct-bg-color);
+}
+.text-input.incorrect {
+  border-color: var(--wrong-color);
+  background-color: var(--incorrect-bg-color);
+}
+.btn.btn-correct {
+  background-color: var(--correct-color);
+  border-color: var(--correct-color);
+  color: white;
+}
+.btn.btn-incorrect {
+  background-color: var(--wrong-color);
+  border-color: var(--wrong-color);
+  color: white;
+}
+.correct-option {
+  animation: pulseCorrect 1s;
+  border: 3px solid var(--correct-color) !important;
+}
+.incorrect-option {
+  animation: shake 0.5s;
+  border: 3px solid var(--wrong-color) !important;
+}
+@keyframes pulseCorrect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* --- MODAL SYSTEM --- */
@@ -633,35 +711,48 @@ body.dark-mode .screen::before {
 #level-complete-screen .screen-content {
   gap: 20px;
 }
-#achievements-modal {
-  height: 85vh;
-  max-height: 700px;
-  padding: 10px 20px 20px 20px;
+.level-complete-content {
+  text-align: center;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
 }
 .result-stars {
   display: flex;
   gap: 10px;
 }
 .result-star {
-  width: 60px;
-  height: 60px;
-  opacity: 0.2;
-  color: #a6a6a6;
-  transform: scale(0.8);
+  width: 40px;
+  height: 40px;
+  margin: 0 5px;
+  color: var(--text-light);
+  opacity: 0.3;
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .result-star.active {
-  opacity: 1;
   color: var(--secondary-color);
-  transform: scale(1);
+  opacity: 1;
+  transform: scale(1.1);
 }
-.final-score-text {
-  font-size: 1.5em;
-  font-weight: 700;
-  margin: 0;
+.answers-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 20px 0;
 }
-#level-complete-screen .subtitle {
-  margin-bottom: 0;
+.stat-item {
+  font-size: 18px;
+}
+.correct-stat {
+  color: var(--correct-color);
+}
+.wrong-stat {
+  color: var(--wrong-color);
+}
+#achievements-modal {
+  height: 85vh;
+  max-height: 700px;
+  padding: 10px 20px 20px 20px;
 }
 .achievements-list {
   width: 100%;
@@ -697,35 +788,30 @@ body.dark-mode .screen::before {
   font-size: 0.9em;
   color: var(--text-light);
 }
-#achievements-modal .btn-secondary {
-  margin-top: 15px;
-  flex-shrink: 0;
-}
 
-/* --- UMPAN BALIK & NOTIFIKASI --- */
+/* --- NOTIFIKASI & FEEDBACK --- */
 @keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
   10%,
-  30%,
-  50%,
-  70%,
   90% {
     transform: translateX(-5px);
   }
   20%,
-  40%,
-  60%,
   80% {
+    transform: translateX(5px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-5px);
+  }
+  40%,
+  60% {
     transform: translateX(5px);
   }
 }
 .shake-feedback {
   animation: shake 0.5s ease;
 }
-
 .notification {
   position: fixed;
   top: 80px;
@@ -745,9 +831,6 @@ body.dark-mode .screen::before {
   opacity: 1;
   transform: translateY(0) translateX(-50%);
 }
-.notification.default {
-  background-color: var(--secondary-color);
-}
 .notification.correct {
   background-color: var(--correct-color);
 }
@@ -758,6 +841,7 @@ body.dark-mode .screen::before {
   background: linear-gradient(45deg, var(--secondary-color), #ffc107);
 }
 
+/* --- TOGGLE & SPINNER --- */
 .toggle {
   position: relative;
   width: 50px;
@@ -786,8 +870,6 @@ body.dark-mode .screen::before {
 .toggle:checked::before {
   transform: translateX(22px);
 }
-
-/* SPINNER for loading */
 .spinner {
   width: 50px;
   height: 50px;
@@ -803,271 +885,33 @@ body.dark-mode .screen::before {
   }
 }
 
-/* Kotak modal untuk feedback */
-.feedback-modal {
-  background: var(--surface-bg);
-  padding: 30px 40px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  transform: scale(0.7);
-  opacity: 0;
-  animation: zoomIn 0.3s forwards;
-}
-
-@keyframes zoomIn {
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.feedback-title {
-  font-size: 2.5em;
-  font-weight: 900;
-  margin: 0 0 25px 0;
-}
-
-.feedback-modal.feedback-correct .feedback-title {
-  color: var(--correct-color);
-}
-
-.feedback-modal.feedback-wrong .feedback-title {
-  color: var(--wrong-color);
-}
-
-/* -- CSS TAMBAHAN UNTUK FEEDBACK INSTAN -- */
-
-/* Warna border untuk input teks */
-.text-input.correct {
-  border-color: var(--correct-color);
-  background-color: #314d38; /* Sedikit hijau gelap */
-}
-
-.text-input.incorrect {
-  border-color: var(--wrong-color);
-  background-color: #4d3131; /* Sedikit merah gelap */
-}
-
-/* Warna untuk tombol "Lanjut" */
-.btn.btn-correct {
-  background-color: var(--correct-color);
-  border-color: var(--correct-color);
-}
-
-.btn.btn-incorrect {
-  background-color: var(--wrong-color);
-  border-color: var(--wrong-color);
-}
-/* File: css/style.css */
-
-/* ... (CSS Anda yang sudah ada di bagian atas) ... */
-
-/* --- CSS TAMBAHAN UNTUK STATISTIK LEVEL SELESAI --- */
-
-/* Kontainer utama untuk semua item statistik */
-.level-stats-container {
-  margin-top: 25px; /* Jarak dari bintang di atasnya */
-  padding-top: 20px; /* Jarak di dalam kontainer */
-  border-top: 1px solid var(--border-color-light); /* Garis pemisah tipis */
-  display: flex; /* Membuat item statistik berjajar ke samping */
-  justify-content: space-around; /* Memberi jarak yang sama antar item */
-  width: 100%;
-  gap: 15px; /* Jarak antar item statistik */
-}
-
-/* Setiap item statistik (label dan nilainya) */
-.stat-item {
-  display: flex;
-  flex-direction: column; /* Membuat label di atas dan nilai di bawah */
-  align-items: center; /* Teks menjadi rata tengah */
-  background-color: var(--surface-bg-dark); /* Warna latar sedikit berbeda */
-  padding: 10px 15px;
-  border-radius: 12px;
-  flex-grow: 1; /* Membuat setiap item memiliki lebar yang sama */
-  min-width: 80px; /* Lebar minimum untuk setiap item */
-}
-
-/* Gaya untuk label (teks kecil seperti "Skor Akhir") */
-.stat-label {
-  font-size: 0.9em;
-  color: var(--text-light); /* Warna teks lebih redup */
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-
-/* Gaya untuk nilai statistik (angka besar) */
-.stat-value {
-  font-size: 2em; /* Ukuran font lebih besar */
-  font-weight: 700; /* Teks tebal */
-  color: var(--text-color); /* Warna teks utama */
-  line-height: 1;
-}
-
-/* Class khusus untuk memberi warna pada teks jawaban benar */
-.correct-text {
-  color: var(--correct-color);
-}
-
-/* Class khusus untuk memberi warna pada teks jawaban salah */
-.wrong-text {
-  color: var(--wrong-color);
-}
-/* Level Complete Screen Styles */
-.level-complete-content {
-  text-align: center;
-  padding: 20px;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.score-display {
-  margin: 20px 0;
-}
-
-.stars-display {
-  margin: 15px 0;
-}
-
-.result-star {
-  width: 40px;
-  height: 40px;
-  margin: 0 5px;
-  filter: grayscale(100%);
-  opacity: 0.7;
-}
-
-.result-star.active {
-  filter: grayscale(0%);
-  opacity: 1;
-}
-
-.answers-stats {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin: 20px 0;
-}
-
-.stat-item {
-  font-size: 18px;
-}
-
-.correct-stat {
-  color: #4caf50;
-}
-
-.wrong-stat {
-  color: #f44336;
-}
-/* style.css */
-
-/* ... (CSS Anda yang sudah ada) ... */
-
-/* --- CSS TAMBAHAN UNTUK GAMBAR KATEGORI --- */
-
-/* Mengubah tombol kategori menjadi flexbox untuk menata layout */
-.btn-category {
-  padding: 10px; /* Sedikit mengurangi padding agar gambar pas */
-  flex-direction: column; /* Menata konten secara vertikal */
-  justify-content: flex-start; /* Konten dimulai dari atas */
-  align-items: stretch; /* Konten meregang selebar tombol */
-  height: 150px; /* Beri tinggi yang tetap untuk konsistensi */
-  overflow: hidden; /* Sembunyikan bagian gambar yang keluar dari border-radius */
-}
-
-/* Kontainer untuk gambar agar bisa diposisikan */
-.category-image-container {
-  width: 100%;
-  height: 60%; /* Gambar mengisi 60% dari tinggi tombol */
-  margin-bottom: 8px; /* Jarak antara gambar dan teks info */
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Gaya untuk elemen gambar itu sendiri */
-.category-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Pastikan gambar mengisi kontainer tanpa distorsi */
-  transition: transform 0.3s ease; /* Efek transisi untuk hover */
-}
-
-/* Efek zoom saat kursor di atas tombol */
-.btn-category:hover .category-image {
-  transform: scale(1.1);
-}
-
-/* Kontainer untuk info (nama kategori dan bintang) */
-.category-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-grow: 1; /* Mengisi sisa ruang di bawah gambar */
-}
-
-.category-name {
-  font-size: 1.1em;
-}
-
-.category-stars {
-  margin-top: 5px; /* Jarak antara nama dan bintang */
-}
-/* Number Display Styles */
-.number-challenge-container {
+/* --- TANTANGAN ANGKA, WARNA & KATA KERJA --- */
+.number-challenge-container,
+.verb-challenge-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 30px 0;
-  padding: 20px;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto 25px auto;
+  padding: 10px;
 }
-
 .number-display-box {
   width: 220px;
   height: 220px;
-  background-color: #ffffff;
-  border: 10px solid #3498db;
+  background-color: var(--surface-bg);
+  border: 10px solid var(--primary-color);
   border-radius: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px var(--shadow-color);
 }
-
 .number-display {
   font-size: 120px;
   font-weight: bold;
-  color: #2c3e50;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  color: var(--text-color);
 }
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .number-display-box {
-    width: 180px;
-    height: 180px;
-    border-width: 8px;
-  }
-
-  .number-display {
-    font-size: 90px;
-  }
-}
-
-@media (max-width: 480px) {
-  .number-display-box {
-    width: 150px;
-    height: 150px;
-    border-width: 6px;
-  }
-
-  .number-display {
-    font-size: 70px;
-  }
-}
-
-/* Color Challenge Styles */
 .color-challenge-container {
   display: flex;
   flex-direction: column;
@@ -1076,145 +920,104 @@ body.dark-mode .screen::before {
   margin: 20px 0;
 }
 
+#challenge-container .listen-type-container {
+  justify-content: center;
+  margin-bottom: 25px; /* Memberi jarak ke area input di bawahnya */
+}
+
+/* Memperbesar dan mempercantik tombol speaker (#listen-btn) 
+*/
+#challenge-container #listen-btn {
+  width: 100px; /* Lebar tombol */
+  height: 100px; /* Tinggi tombol */
+  border-radius: 50%; /* Membuatnya menjadi lingkaran sempurna */
+  font-size: 3em; /* Memperbesar ikon speaker */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px -5px var(--primary-color);
+}
+
+#challenge-container #listen-btn:hover {
+  transform: scale(1.1); /* Efek membesar saat disentuh */
+  filter: brightness(1.1);
+}
+
+/* Memberi sedikit jarak pada area input di bawahnya agar tidak terlalu mepet.
+*/
+#user-input-area .listen-type-container {
+  margin-top: 10px;
+}
 .color-display-box {
   width: 200px;
   height: 200px;
   border-radius: 15px;
-  border: 3px solid #333;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  border: 3px solid var(--surface-border);
+  box-shadow: 0 4px 10px var(--shadow-color);
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
 }
-
 .color-name-label {
-  background-color: rgba(255,255,255,0.8);
+  background-color: var(--surface-bg);
   padding: 5px 10px;
   border-radius: 20px;
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
 }
-
-.options-grid {
-  display: grid;
-  gap: 10px;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
 .btn-option.color-option {
   height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  border: 2px solid #333;
+  border: 2px solid var(--surface-border);
   border-radius: 8px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .btn-option.color-option:hover {
   transform: scale(1.03);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
-
-/* Text contrast for dark backgrounds */
-.btn-option.color-option[style*="#000000"],
-.btn-option.color-option[style*="#00008B"],
-.btn-option.color-option[style*="#006400"],
-.btn-option.color-option[style*="#800080"] {
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-}
-
-/* Highlight correct/incorrect answers */
-.correct-option {
-  animation: pulseCorrect 1s;
-  border: 3px solid #2ecc71 !important;
-}
-
-.incorrect-option {
-  animation: shake 0.5s;
-  border: 3px solid #e74c3c !important;
-}
-
-@keyframes pulseCorrect {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
-}
-
-/*================================================================*/
-/* Desain CSS untuk Tantangan Mencocokkan Kata Kerja (Verbs)      */
-/* Tambahkan ini ke file CSS utama Anda                           */
-/*================================================================*/
-
-/**
- * Kontainer utama yang membungkus kotak kata kerja.
- * Fungsinya untuk memusatkan kotak dan memberi ruang.
- */
- .verb-challenge-container {
+.verb-display-box {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  max-width: 450px; /* Atur lebar maksimum kotak */
-  margin: 0 auto 25px auto; /* Jarak atas, (auto) tengah, jarak bawah 25px */
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-/**
-* Kotak utama yang menampilkan kata kerja.
-* Didesain agar terlihat seperti kartu/foto yang modern dan bersih.
-*/
-.verb-display-box {
-  display: flex; /* Menggunakan Flexbox untuk memusatkan teks di dalamnya */
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  aspect-ratio: 16 / 9; /* Menjaga rasio aspek seperti layar atau foto (16:9) */
-  background: linear-gradient(135deg, #ffffff, #f8f9fa); /* Gradien halus untuk latar belakang */
-  border-radius: 16px; /* Sudut yang membulat agar terlihat lebih modern */
-  border: 1px solid #dee2e6; /* Garis tepi (border) yang tipis dan lembut */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08); /* Efek bayangan untuk membuatnya 'terangkat' dari layar */
+  aspect-ratio: 16 / 9;
+  background: var(--box-bg-gradient);
+  border-radius: 16px;
+  border: 1px solid var(--box-border-color);
+  box-shadow: 0 4px 8px var(--shadow-color), 0 10px 20px var(--shadow-color);
   padding: 20px;
-  box-sizing: border-box;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animasi transisi saat hover */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
-
-/* Efek saat kursor mouse berada di atas kotak */
 .verb-display-box:hover {
-  transform: translateY(-5px) scale(1.02); /* Sedikit terangkat dan membesar */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 15px 25px rgba(0, 0, 0, 0.1); /* Bayangan menjadi lebih jelas */
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 12px var(--shadow-color), 0 15px 25px var(--shadow-color);
 }
-
-/**
-* Teks kata kerja (Bahasa Indonesia) di dalam kotak.
-*/
 .verb-display {
-  /* Ganti 'Your-Game-Font' dengan nama font yang Anda gunakan */
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-size: 2.8em; /* Ukuran font besar agar mudah dibaca */
-  font-weight: 600; /* Sedikit lebih tebal dari normal */
-  color: #212529; /* Warna teks gelap agar kontras dengan latar belakang */
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 2.8em;
+  font-weight: 600;
+  color: var(--display-text-color);
   text-align: center;
 }
-
-/* Penyesuaian untuk layar yang lebih kecil (Responsive Design) */
 @media (max-width: 480px) {
   .verb-display-box {
-      aspect-ratio: 4 / 3; /* Mengubah rasio aspek agar lebih cocok di layar kecil */
+    aspect-ratio: 4 / 3;
   }
   .verb-display {
-      font-size: 2.2em; /* Mengecilkan ukuran font di layar kecil */
+    font-size: 2.2em;
+  }
+  .number-display-box {
+    width: 150px;
+    height: 150px;
+    border-width: 6px;
+  }
+  .number-display {
+    font-size: 70px;
   }
 }
