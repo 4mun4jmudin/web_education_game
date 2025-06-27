@@ -19,8 +19,10 @@
         <h1 class="app-title">Word Adventure</h1>
         <div class="header-actions">
           <button id="achievements-btn" class="btn btn-icon">🏆</button>
-    
-          <a href="profile.html" class="btn btn-icon" aria-label="Informasi Tim">ℹ️</a>
+
+          <a href="profile.html" class="btn btn-icon" aria-label="Informasi Tim"
+            >ℹ️</a
+          >
           <button
             id="settings-btn"
             class="btn btn-icon"
@@ -39,7 +41,9 @@
       </div>
 
       <div id="start-screen" class="screen">
-        <hr><hr><hr>
+        <hr />
+        <hr />
+        <hr />
         <h1 class="title">Ayo Belajar!</h1>
         <h2 class="subtitle">Pilih Topik Untuk Dimainkan</h2>
         <div id="category-selection-container" class="category-grid"></div>
@@ -79,7 +83,8 @@
 
       <div id="level-complete-screen" class="screen">
         <div class="level-complete-content">
-          <hr><hr>
+          <hr />
+          <hr />
           <h2>Level Selesai!</h2>
 
           <div class="score-display">
@@ -127,13 +132,25 @@
           <input type="checkbox" id="music-toggle" class="toggle" />
         </div>
         <div class="settings-option">
+          <label for="music-volume-slider">Volume Musik</label>
+          <input
+            type="range"
+            id="music-volume-slider"
+            min="0"
+            max="1"
+            step="0.05"
+          />
+        </div>
+        <div class="settings-option">
           <label for="sfx-toggle">Efek Suara</label>
           <input type="checkbox" id="sfx-toggle" class="toggle" />
         </div>
+        
         <div class="settings-option">
           <label for="tts-toggle">Suara Panduan</label>
           <input type="checkbox" id="tts-toggle" class="toggle" />
         </div>
+        
         <div class="settings-option">
           <label for="dark-mode-toggle">Mode Gelap</label>
           <input type="checkbox" id="dark-mode-toggle" class="toggle" />

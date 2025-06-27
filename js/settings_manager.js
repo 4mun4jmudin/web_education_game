@@ -8,6 +8,7 @@ class SettingsManager {
   loadSettings() {
     const defaults = {
       musicMuted: true,
+      musicVolume: 0.5,
       sfxMuted: false,
       ttsMuted: false,
       difficulty: "easy",

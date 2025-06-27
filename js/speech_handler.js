@@ -24,13 +24,24 @@ class SpeechHandler {
    * @param {string} text - Teks yang akan diucapkan.
    */
   speak(text) {
-    if (this.settings.settings.ttsMuted) return; // Cek pengaturan
+    if (this.settings.settings.ttsMuted) return;
+
+    if (typeof duckMusic === "function" && !settings.settings.musicMuted) {
+      duckMusic();
+    }
 
     if (this.synth.speaking) {
       this.synth.cancel();
     }
     const utterThis = new SpeechSynthesisUtterance(text);
     utterThis.lang = "en-US";
+
+    utterThis.onend = () => {
+      if (typeof restoreMusic === "function" && !settings.settings.musicMuted) {
+        restoreMusic();
+      }
+    };
+
     this.synth.speak(utterThis);
   }
 
