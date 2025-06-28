@@ -3,255 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biodata Tim 3D Interaktif</title>
-    <style>
-        /* CSS untuk tampilan dasar halaman */
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Latar belakang gelap */
-            color: #f9fafb; /* Teks terang */
-            overflow: hidden; /* Mencegah scroll bar yang tidak perlu */
-        }
-
-        /* Styling untuk canvas 3D */
-        #bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            outline: none;
-        }
-
-        /* Kontainer untuk konten teks di atas canvas */
-        .content {
-            position: absolute;
-            top: 5vh;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 10;
-            pointer-events: none; /* Agar tidak mengganggu interaksi mouse dengan canvas */
-        }
-
-        .content h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem); /* Ukuran font responsif */
-            font-weight: 800;
-            margin: 0;
-            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .content p {
-            font-size: clamp(0.9rem, 2vw, 1.2rem);
-            margin-top: 0.5rem;
-            color: #d1d5db; /* Warna teks yang sedikit lebih redup */
-            max-width: 600px;
-        }
-    </style>
-    <!-- Mengimpor font Inter dari Google Fonts -->
+    <title>Kartu Data 3D Interaktif - Mobile Friendly</title>
+    <!-- Memuat Tailwind CSS untuk styling halaman -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Menggunakan font Inter dari Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Style dasar untuk body dan canvas */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Mencegah scrollbar halaman utama */
+            background-color: #111827;
+            /* Mencegah interaksi yang tidak diinginkan di mobile */
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-
-    <!-- Konten teks yang akan ditampilkan di atas scene 3D -->
-    <div class="content">
-        <h1>Biodata Tim Kami</h1>
-        <p>Tim Pembuat game edukasi pembelajaran bahasa ingris dengan menarik.</p>
+<body class="bg-gray-900 text-white">
+    <!-- Kontainer utama aplikasi -->
+    <div id="container" class="fixed top-0 left-0 w-full h-full">
+        <!-- Canvas untuk rendering 3D akan ditempatkan di sini oleh Three.js -->
     </div>
 
-    <!-- Canvas di mana scene 3D akan dirender -->
-    <canvas id="bg"></canvas>
+    <!-- Teks instruksi untuk pengguna -->
+    <div id="instruction" class="absolute top-5 left-1/2 -translate-x-1/2 p-4 w-11/12 max-w-md rounded-lg bg-black bg-opacity-40 text-center pointer-events-none">
+        <h1 class="text-lg md:text-2xl font-bold text-gray-100">Tim Pembuat Game Edukasi belajar Bahasa ingris</h1>
+        
+    </div>
 
-    <!-- Mengimpor pustaka three.js -->
+    <!-- Memuat pustaka Three.js dan GSAP untuk animasi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-            }
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js"
         }
+    }
     </script>
 
     <script type="module">
-        // Mengimpor modul yang diperlukan dari three.js
+        // Import Three.js
         import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- Inisialisasi Dasar ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({
-            canvas: document.querySelector('#bg'),
-            antialias: true,
-        });
-        
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.position.set(0, 0, 25); // Mundurkan kamera sedikit
+        // --- Inisialisasi Variabel Dasar ---
+        let scene, camera, renderer, cardsGroup, raycaster;
+        const container = document.getElementById('container');
+        const isMobile = window.innerWidth <= 768;
 
-        // --- Kontrol Kamera ---
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // Efek redaman untuk gerakan yang lebih halus
-        controls.enablePan = false; // Menonaktifkan panning
-        controls.enableZoom = false; // Menonaktifkan zoom
-        controls.minPolarAngle = Math.PI / 4; // Batas rotasi vertikal
-        controls.maxPolarAngle = 3 * Math.PI / 4;
+        // --- Variabel untuk Interaksi ---
+        let isDragging = false;
+        const startMousePosition = { x: 0, y: 0 };
+        let previousMousePosition = { x: 0, y: 0 };
+        const mousePosition = new THREE.Vector2();
+        let focusedCard = null;
+        const originalTransforms = new Map();
+        let initialPinchDistance = 0;
 
-        // --- Pencahayaan ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 1.5, 100);
-        pointLight.position.set(5, 5, 15);
-        scene.add(pointLight);
-
-        // --- Data Tim (Ganti path avatarUrl dengan path lokal Anda) ---
-        const teamData = [
-            { name: 'Amu Najmudin', role: 'UI/UX Designer', skill: 'Figma, Prototyping', avatarUrl: 'https://tse2.mm.bing.net/th?id=OIP.H2cpsg6m2DYo1wXLhQuoKQAAAA&pid=Api&P=0&h=180' },
-            { name: 'Aliska', role: 'Frontend Dev', skill: 'React, Vue.js', avatarUrl: './aliska.jpg' },
-            { name: 'M Rais', role: 'Backend Dev', skill: 'Node.js, Golang', avatarUrl: './m_rais.jpg' },
-            { name: 'Rizki Gumilar', role: 'Project Manager', skill: 'Agile, Scrum', avatarUrl: './rizki_gumilar.jpg' },
-            { name: 'Busrol Karomah', role: '3D Artist', skill: 'Blender, ZBrush', avatarUrl: './busrol_karomah.jpg' },
-            { name: 'Firman', role: 'QA Engineer', skill: 'Cypress, Testing', avatarUrl: './firman.jpg' },
+        // --- Data untuk Kartu ---
+        const cardDataArray = [
+            { nama: "M rais", keahlian: "QA & Pack Item", foto: "https://media-sin2-1.cdn.whatsapp.net/v/t61.24694-24/473407693_1734265077446714_3560871017682739525_n.jpg?ccb=11-4&oh=01_Q5Aa1wFHy20Hj7i7AEP1rHDwRkJZgeIawyg5PTTH_7yg2zIZgA&oe=686C61D1&_nc_sid=5e03e0&_nc_cat=103" },
+            { nama: "Adam", keahlian: "QA & Pack Item", foto: "https://media-sin2-2.cdn.whatsapp.net/v/t61.24694-24/488629430_1001344805473334_1673358994336404033_n.jpg?ccb=11-4&oh=01_Q5Aa1wE7grOqVJnJMGbDsPk-yd9i7g2rz1yhPZkJSlrOSLsVcA&oe=686C4FF9&_nc_sid=5e03e0&_nc_cat=103" },
+            { nama: "Amu najmudin", keahlian: "full coding", foto: "https://avatars.githubusercontent.com/u/138182665?v=4?s=400" },
+            { nama: "Aliska", keahlian: "Desain Game", foto: "https://media-sin6-1.cdn.whatsapp.net/v/t61.24694-24/506254809_728338216319030_2301218554092644603_n.jpg?ccb=11-4&oh=01_Q5Aa1wH5ub8_CjxIdzt38qvtBfWTRCzR7gnc3Li2phpDAdHUxQ&oe=686C4A8D&_nc_sid=5e03e0&_nc_cat=106" },
+            { nama: "Rizky Gumilar", keahlian: "Pack Item", foto: "https://media-sin6-2.cdn.whatsapp.net/v/t61.24694-24/505205269_4071991449795609_299494481146133180_n.jpg?ccb=11-4&oh=01_Q5Aa1wH9pnM2ragrIlKOrol5RooYrmyd-TfchZP5uGjC0ZDpTw&oe=686C577D&_nc_sid=5e03e0&_nc_cat=106" },
+            { nama: "Firman", keahlian: "Suport", foto: "https://placehold.co/200x200/e2e8f0/1a202c?text=HW" }
         ];
-
-        const cards = [];
-        const textureLoader = new THREE.TextureLoader();
         
-        // --- Placeholder untuk gambar yang gagal dimuat ---
-        const placeholderMaterial = new THREE.MeshStandardMaterial({ color: 0x374151 });
+        // --- Fungsi Utama ---
+        function init() {
+            scene = new THREE.Scene();
+            raycaster = new THREE.Raycaster();
 
-        // --- Fungsi untuk Membuat Kartu Profil ---
-        function createProfileCard(data, index) {
-            const cardGroup = new THREE.Group();
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
 
-            // Membuat tekstur dari canvas 2D untuk teks
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400;
-            canvas.height = 500;
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // Penyesuaian zoom awal untuk mobile
+            camera.position.z = isMobile ? 14 : 10;
 
-            ctx.fillStyle = '#1f2937';
-            ctx.beginPath();
-            ctx.roundRect(0, 0, canvas.width, canvas.height, 20);
-            ctx.fill();
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
 
-            ctx.fillStyle = '#f9fafb';
-            ctx.font = 'bold 36px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(data.name, canvas.width / 2, 290);
+            cardsGroup = new THREE.Group();
+            createCards();
+            scene.add(cardsGroup);
 
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '28px Inter';
-            ctx.fillText(data.role, canvas.width / 2, 340);
-
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '24px Inter';
-            ctx.fillText(data.skill, canvas.width / 2, 380);
-            
-            const cardTexture = new THREE.CanvasTexture(canvas);
-            const cardMaterial = new THREE.MeshStandardMaterial({ map: cardTexture, roughness: 0.7, metalness: 0.2 });
-            const cardGeometry = new THREE.BoxGeometry(8, 10, 0.2);
-            const cardMesh = new THREE.Mesh(cardGeometry, cardMaterial);
-            cardGroup.add(cardMesh);
-
-            // Membuat geometri avatar
-            const avatarGeometry = new THREE.CircleGeometry(2.5, 64);
-            const avatarMesh = new THREE.Mesh(avatarGeometry, placeholderMaterial); // Gunakan placeholder dulu
-            avatarMesh.position.set(0, 2, 0.15);
-            cardGroup.add(avatarMesh);
-
-            // Memuat tekstur avatar dari path lokal
-            textureLoader.load(data.avatarUrl, 
-                // onSuccess
-                (avatarTexture) => {
-                    avatarMesh.material = new THREE.MeshStandardMaterial({ map: avatarTexture });
-                }, 
-                // onProgress (tidak digunakan)
-                undefined, 
-                // onError
-                (err) => {
-                    console.error(`Gagal memuat gambar untuk ${data.name}: ${data.avatarUrl}`);
-                    // Jika gagal, avatar akan tetap menggunakan placeholderMaterial
-                }
-            );
-            
-            const angle = (index / teamData.length) * Math.PI * 2;
-            const radius = 18; // Perbesar radius lingkaran
-            cardGroup.position.x = Math.cos(angle) * radius;
-            cardGroup.position.z = Math.sin(angle) * radius;
-            cardGroup.lookAt(camera.position);
-
-            cardGroup.userData.originalY = cardGroup.position.y;
-            scene.add(cardGroup);
-            cards.push(cardGroup);
+            addEventListeners();
+            animate();
         }
 
-        // Membuat semua kartu
-        teamData.forEach(createProfileCard);
-
-        // --- Interaksi Mouse ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let intersectedObject = null;
-
-        function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        }
-        window.addEventListener('mousemove', onMouseMove);
-
-        // --- Loop Animasi ---
-        const clock = new THREE.Clock();
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(cards, true);
-
-            if (intersects.length > 0) {
-                // Temukan parent group dari objek yang di-hover
-                let currentObject = intersects[0].object;
-                while (currentObject.parent && !currentObject.userData.originalY) {
-                    currentObject = currentObject.parent;
-                }
-                const newIntersected = currentObject;
-
-                if (intersectedObject !== newIntersected) {
-                    intersectedObject = newIntersected;
-                }
-            } else {
-                intersectedObject = null;
-            }
-
-            cards.forEach((card, index) => {
-                // Animasi mengambang
-                card.position.y = card.userData.originalY + Math.sin(elapsedTime * 0.7 + index * 0.5) * 0.5;
+        // --- Fungsi untuk Membuat Semua Kartu ---
+        function createCards() {
+            // Penyesuaian radius galeri untuk mobile
+            const radius = isMobile ? 4.8 : 5;
+            cardDataArray.forEach((data, i) => {
+                const geometry = new THREE.BoxGeometry(2.5, 4, 0.1);
                 
-                // Animasi saat di-hover
-                if (card === intersectedObject) {
-                    card.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
-                } else {
-                    card.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-                }
-                
-                // Selalu menghadap ke pusat
-                card.lookAt(new THREE.Vector3(0, card.position.y, 0));
+                const frontTexture = createCardTexture(data.nama, data.keahlian, '#1a202c', '#e2e8f0', data.foto);
+                const backTexture = createCardTexture("Portfolio", `Project-${i+1}`, '#2d3748', '#a0aec0', null);
+                const sideMaterial = new THREE.MeshStandardMaterial({ color: 0x4a5568, roughness: 0.5, metalness: 0.2 });
+
+                const materials = [
+                    sideMaterial, sideMaterial, sideMaterial, sideMaterial,
+                    new THREE.MeshStandardMaterial({ map: frontTexture, roughness: 0.2, metalness: 0.1 }),
+                    new THREE.MeshStandardMaterial({ map: backTexture, roughness: 0.2, metalness: 0.1 }),
+                ];
+
+                const cardMesh = new THREE.Mesh(geometry, materials);
+                const angle = (i / cardDataArray.length) * Math.PI * 2;
+                cardMesh.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+                cardMesh.lookAt(new THREE.Vector3(0, 0, 0));
+
+                originalTransforms.set(cardMesh.uuid, {
+                    position: cardMesh.position.clone(),
+                    quaternion: cardMesh.quaternion.clone(),
+                });
+                cardsGroup.add(cardMesh);
             });
-
-            controls.update();
-            renderer.render(scene, camera);
         }
 
-        // Menangani resize window
-        window.addEventListener('resize', () => {
+        // --- Fungsi untuk Membuat Tekstur Kartu (diperbarui untuk menangani gambar) ---
+        function createCardTexture(title, subtitle, bgColor, textColor, imageUrl) {
+            const canvas = document.createElement('canvas');
+            const textureSize = 512;
+            canvas.width = textureSize;
+            canvas.height = textureSize * (4 / 2.5);
+            const context = canvas.getContext('2d');
+            const texture = new THREE.CanvasTexture(canvas);
+
+            const drawContent = (img = null) => {
+                context.fillStyle = bgColor;
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                let textYOffset = -20;
+                if (img) {
+                    const imageSize = 200;
+                    const imageX = (canvas.width - imageSize) / 2;
+                    const imageY = 80;
+                    context.save();
+                    context.beginPath();
+                    context.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 2, 0, Math.PI * 2, true);
+                    context.closePath();
+                    context.clip();
+                    context.drawImage(img, imageX, imageY, imageSize, imageSize);
+                    context.restore();
+                    textYOffset = imageY + imageSize + 20;
+                }
+                context.fillStyle = textColor;
+                context.textAlign = 'center';
+                context.font = 'bold 50px Inter';
+                context.fillText(title, canvas.width / 2, canvas.height / 2 + textYOffset);
+                context.font = 'normal 35px Inter';
+                context.fillText(subtitle, canvas.width / 2, canvas.height / 2 + textYOffset + 60);
+                texture.needsUpdate = true;
+            };
+
+            if (!imageUrl) {
+                drawContent(null);
+            } else {
+                const imageLoader = new Image();
+                imageLoader.crossOrigin = "Anonymous";
+                imageLoader.onload = () => drawContent(imageLoader);
+                imageLoader.onerror = () => drawContent(null);
+                imageLoader.src = imageUrl;
+            }
+            return texture;
+        }
+
+        // --- Menambahkan Event Listeners untuk Mouse dan Touch ---
+        function addEventListeners() {
+            window.addEventListener('resize', onWindowResize);
+            // Mouse Events
+            window.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('wheel', onWheelScroll, { passive: false });
+            // Touch Events
+            window.addEventListener('touchstart', onTouchStart, { passive: false });
+            window.addEventListener('touchmove', onTouchMove, { passive: false });
+            window.addEventListener('touchend', onTouchEnd);
+        }
+
+        // --- Event Handlers ---
+        function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }
 
-        animate();
+        // --- Mouse Handlers ---
+        function onMouseDown(event) {
+            handleInteractionStart(event.clientX, event.clientY);
+        }
+        function onMouseMove(event) {
+            handleInteractionMove(event.clientX, event.clientY);
+        }
+        function onMouseUp(event) {
+            handleInteractionEnd(event.clientX, event.clientY);
+        }
+        function onWheelScroll(event) {
+            if (focusedCard) return;
+            event.preventDefault();
+            camera.position.z += event.deltaY * 0.01;
+            camera.position.z = THREE.MathUtils.clamp(camera.position.z, isMobile ? 6 : 4, 25);
+        }
+
+        // --- Touch Handlers ---
+        function onTouchStart(event) {
+            event.preventDefault();
+            if (event.touches.length === 1) {
+                handleInteractionStart(event.touches[0].clientX, event.touches[0].clientY);
+            } else if (event.touches.length === 2) {
+                initialPinchDistance = getPinchDistance(event);
+            }
+        }
+        function onTouchMove(event) {
+            event.preventDefault();
+            if (event.touches.length === 1) {
+                handleInteractionMove(event.touches[0].clientX, event.touches[0].clientY);
+            } else if (event.touches.length === 2) {
+                handlePinch(event);
+            }
+        }
+        function onTouchEnd(event) {
+            // Hanya proses 'klik' jika sentuhan terakhir adalah satu jari
+            if (event.changedTouches.length === 1) {
+                handleInteractionEnd(previousMousePosition.x, previousMousePosition.y);
+            }
+            initialPinchDistance = 0; // Reset pinch distance
+        }
+        
+        // --- Unified Interaction Logic ---
+        function handleInteractionStart(x, y) {
+            isDragging = true;
+            startMousePosition.x = x;
+            startMousePosition.y = y;
+            previousMousePosition.x = x;
+            previousMousePosition.y = y;
+        }
+        function handleInteractionMove(x, y) {
+            mousePosition.x = (x / window.innerWidth) * 2 - 1;
+            mousePosition.y = -(y / window.innerHeight) * 2 + 1;
+            if (!isDragging) return;
+            const deltaMove = { x: x - previousMousePosition.x, y: y - previousMousePosition.y };
+            if (focusedCard) {
+                focusedCard.rotation.y += deltaMove.x * 0.01;
+                focusedCard.rotation.x += deltaMove.y * 0.01;
+            } else {
+                cardsGroup.rotation.y += deltaMove.x * 0.005;
+                cardsGroup.rotation.x += deltaMove.y * 0.005;
+            }
+            previousMousePosition = { x: x, y: y };
+        }
+        function handleInteractionEnd(x, y) {
+            const deltaX = Math.abs(x - startMousePosition.x);
+            const deltaY = Math.abs(y - startMousePosition.y);
+            if (deltaX < 10 && deltaY < 10) { // Toleransi lebih besar untuk sentuhan
+                handleCardClick();
+            }
+            isDragging = false;
+        }
+
+        // --- Pinch-to-Zoom Logic ---
+        function getPinchDistance(event) {
+            const dx = event.touches[0].clientX - event.touches[1].clientX;
+            const dy = event.touches[0].clientY - event.touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        function handlePinch(event) {
+            if (focusedCard) return;
+            const currentPinchDistance = getPinchDistance(event);
+            const deltaDistance = currentPinchDistance - initialPinchDistance;
+            camera.position.z -= deltaDistance * 0.05; // Sesuaikan kecepatan zoom cubit
+            camera.position.z = THREE.MathUtils.clamp(camera.position.z, isMobile ? 6 : 4, 25);
+            initialPinchDistance = currentPinchDistance;
+        }
+        
+        function handleCardClick() {
+            raycaster.setFromCamera(mousePosition, camera);
+            const intersects = raycaster.intersectObjects(cardsGroup.children);
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                if (focusedCard && focusedCard.uuid === clickedObject.uuid) {
+                    unfocusCard(clickedObject);
+                } else if (focusedCard) {
+                    unfocusCard(focusedCard, () => focusOnCard(clickedObject));
+                } else {
+                    focusOnCard(clickedObject);
+                }
+            } else if (focusedCard) {
+                unfocusCard(focusedCard);
+            }
+        }
+
+        function focusOnCard(card) {
+            focusedCard = card;
+            cardsGroup.remove(card); 
+            scene.add(card); 
+            document.getElementById('instruction').style.display = 'none';
+            const parentRotation = cardsGroup.rotation.clone();
+            const targetQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(parentRotation.x, parentRotation.y, parentRotation.z));
+            gsap.to(card.position, {
+                duration: 0.8, x: 0, y: 0, z: camera.position.z - 4.5, ease: "power3.out"
+            });
+            gsap.to(card.quaternion, {
+                duration: 1,
+                x: targetQuaternion.x, y: targetQuaternion.y, z: targetQuaternion.z, w: targetQuaternion.w,
+                ease: "power3.out"
+            });
+            gsap.to(card.scale, {
+                duration: 0.8, x: 1.2, y: 1.2, z: 1.2, ease: "power3.out"
+            });
+        }
+        
+        function unfocusCard(card, onComplete = null) {
+            const original = originalTransforms.get(card.uuid);
+            if (!original) return;
+            scene.remove(card); 
+            cardsGroup.add(card); 
+            gsap.to(card.position, {
+                duration: 1,
+                x: original.position.x, y: original.position.y, z: original.position.z,
+                ease: "power3.inOut"
+            });
+            gsap.to(card.scale, {
+                duration: 1, x: 1, y: 1, z: 1, ease: "power3.inOut",
+                onComplete: () => {
+                    focusedCard = null;
+                    document.getElementById('instruction').style.display = 'block';
+                    if (onComplete) onComplete();
+                }
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        
+        init();
+
     </script>
 </body>
 </html>
